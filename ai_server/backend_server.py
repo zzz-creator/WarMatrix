@@ -13,7 +13,13 @@ HOST = "127.0.0.1"
 PORT = 8000
 MODEL_PATH = os.environ.get("MODEL_PATH", "..\\wargame_final_outputs\\checkpoint-125")
 MAX_SEQ_LENGTH = 2048
-LOAD_IN_4BIT = True
+LOAD_IN_4BIT = os.environ.get("LOAD_IN_4BIT", "true").strip().lower() in {"1", "true", "yes", "on"}
+USE_8BIT = os.environ.get("USE_8BIT", "false").strip().lower() in {"1", "true", "yes", "on"}
+CPU_OFFLOAD = os.environ.get("CPU_OFFLOAD", "true").strip().lower() in {"1", "true", "yes", "on"}
+MAX_GPU_MEMORY_GB = float(os.environ.get("MAX_GPU_MEMORY_GB", "4.5"))
+COMPUTE_DTYPE = os.environ.get("COMPUTE_DTYPE", "float16").strip().lower()
+INFERENCE_USE_CACHE = os.environ.get("INFERENCE_USE_CACHE", "false").strip().lower() in {"1", "true", "yes", "on"}
+EMPTY_CUDA_CACHE_AFTER_REQUEST = os.environ.get("EMPTY_CUDA_CACHE_AFTER_REQUEST", "true").strip().lower() in {"1", "true", "yes", "on"}
 
 _model = None
 _tokenizer = None
@@ -92,6 +98,14 @@ def clean_response_text(text: str) -> str:
     return text.strip()
 
 
+def _resolve_compute_dtype() -> torch.dtype:
+    if COMPUTE_DTYPE == "bfloat16":
+        return torch.bfloat16
+    if COMPUTE_DTYPE == "float32":
+        return torch.float32
+    return torch.float16
+
+
 def load_model() -> None:
     global _model, _tokenizer, _resolved_model_path
     if _model is not None and _tokenizer is not None:
@@ -103,20 +117,37 @@ def load_model() -> None:
 
     has_cuda = torch.cuda.is_available()
     model_kwargs = {"trust_remote_code": True}
+    compute_dtype = _resolve_compute_dtype()
 
-    if has_cuda and LOAD_IN_4BIT:
+    if has_cuda and LOAD_IN_4BIT and not USE_8BIT:
         model_kwargs["quantization_config"] = BitsAndBytesConfig(
             load_in_4bit=True,
-            bnb_4bit_compute_dtype=torch.bfloat16,
+            bnb_4bit_compute_dtype=compute_dtype,
             bnb_4bit_quant_type="nf4",
             bnb_4bit_use_double_quant=True,
         )
         model_kwargs["device_map"] = "auto"
+    elif has_cuda and USE_8BIT:
+        model_kwargs["quantization_config"] = BitsAndBytesConfig(
+            load_in_8bit=True,
+            llm_int8_enable_fp32_cpu_offload=CPU_OFFLOAD,
+        )
+        model_kwargs["device_map"] = "auto"
     elif has_cuda:
-        model_kwargs["torch_dtype"] = torch.bfloat16
+        model_kwargs["torch_dtype"] = compute_dtype
         model_kwargs["device_map"] = "auto"
     else:
         model_kwargs["torch_dtype"] = torch.float32
+
+    if has_cuda:
+        # Leave headroom on 6 GB cards so other GPU work can run while the server is alive.
+        gpu_mem_mb = max(int(MAX_GPU_MEMORY_GB * 1024), 1024)
+        model_kwargs["max_memory"] = {0: f"{gpu_mem_mb}MiB", "cpu": "48GiB"}
+
+    if CPU_OFFLOAD:
+        offload_dir = Path(__file__).resolve().parent / "offload"
+        offload_dir.mkdir(parents=True, exist_ok=True)
+        model_kwargs["offload_folder"] = str(offload_dir)
 
     # Lower peak host RAM usage during weight loading on Windows.
     model_kwargs["low_cpu_mem_usage"] = True
@@ -157,7 +188,7 @@ def generate_sitrep(
             outputs = _model.generate(
                 **inputs,
                 max_new_tokens=max_new_tokens,
-                use_cache=True,
+                use_cache=INFERENCE_USE_CACHE,
                 temperature=temperature,
                 top_p=top_p,
                 repetition_penalty=repetition_penalty,
@@ -166,6 +197,13 @@ def generate_sitrep(
 
     decoded = _tokenizer.batch_decode(outputs, skip_special_tokens=True)[0]
     response = decoded.split("### Response:\n")[-1].strip()
+
+    if torch.cuda.is_available() and EMPTY_CUDA_CACHE_AFTER_REQUEST:
+        # Return cached allocator blocks so non-server GPU work can run concurrently.
+        del inputs
+        del outputs
+        torch.cuda.empty_cache()
+
     return clean_response_text(response)
 
 

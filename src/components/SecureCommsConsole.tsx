@@ -168,29 +168,64 @@ export function SecureCommsConsole({ isOpen, onClose, battlefieldContext = 'Sect
         setLoading(true);
 
         try {
-            const result: StrategicChatOutput = await strategicCommandChat({
-                directive: directive.trim(),
-                mode,
-                context: battlefieldContext,
-            });
+            // ── PRIMARY: Python fine-tuned AI server ──────────────────────────
+            let usedFallback = false;
+            let aiMsg: ChatMessage | null = null;
 
-            const aiMsg: ChatMessage = {
-                id: `ai-${Date.now()}`,
-                source: result.source as MessageSource,
-                headline: result.headline,
-                body: result.body,
-                timestamp: nowTs(),
-                classification: result.classification,
-                metrics: result.metrics,
-            };
+            try {
+                const res = await fetch('/api/sitrep', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        instruction: directive.trim(),
+                        battlefield_data: battlefieldContext,
+                    }),
+                });
 
-            setMessages((prev) => [...prev, aiMsg]);
-            setHistoryLog((prev) => [...prev, aiMsg]);
+                if (res.ok) {
+                    const data = await res.json();
+                    aiMsg = {
+                        id: `ai-${Date.now()}`,
+                        source: 'AI_STRATEGIST',
+                        headline: 'TACTICAL AI RESPONSE',
+                        body: data.response ?? '(No response from AI server)',
+                        timestamp: nowTs(),
+                        classification: 'CONFIDENTIAL',
+                    };
+                } else {
+                    // Server returned an error (e.g. 503 = offline) → fall through
+                    usedFallback = true;
+                }
+            } catch {
+                // Network-level failure → fall through to Genkit
+                usedFallback = true;
+            }
+
+            // ── FALLBACK: Genkit / Gemini ─────────────────────────────────────
+            if (usedFallback || aiMsg === null) {
+                const result: StrategicChatOutput = await strategicCommandChat({
+                    directive: directive.trim(),
+                    mode,
+                    context: battlefieldContext,
+                });
+                aiMsg = {
+                    id: `ai-${Date.now()}`,
+                    source: result.source as MessageSource,
+                    headline: result.headline,
+                    body: result.body,
+                    timestamp: nowTs(),
+                    classification: result.classification,
+                    metrics: result.metrics,
+                };
+            }
+
+            setMessages((prev) => [...prev, aiMsg!]);
+            setHistoryLog((prev) => [...prev, aiMsg!]);
         } catch (err) {
             const errMsg: ChatMessage = {
                 id: `err-${Date.now()}`,
                 source: 'SYSTEM',
-                body: 'UPLINK FAILURE — AI Strategist response timed out. Retrying on alternate channel.',
+                body: 'UPLINK FAILURE — All AI channels timed out. Check server status.',
                 timestamp: nowTs(),
             };
             setMessages((prev) => [...prev, errMsg]);
