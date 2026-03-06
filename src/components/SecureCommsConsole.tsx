@@ -46,6 +46,7 @@ interface Props {
     battlefieldContext?: string;
     messages: ChatMessage[];
     onMessagesChange: (messages: ChatMessage[] | ((prev: ChatMessage[]) => ChatMessage[])) => void;
+    disableDirectAiCalls?: boolean;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -136,7 +137,7 @@ const ACTIONS: ActionDef[] = [
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-export function SecureCommsConsole({ isOpen, onClose, battlefieldContext = 'Sector Alpha-9, Highland terrain. Friendly forces at grid B3 and E5. Enemy forces detected at grid D7 and F2.', messages, onMessagesChange }: Props) {
+export function SecureCommsConsole({ isOpen, onClose, battlefieldContext = 'Sector Alpha-9, Highland terrain. Friendly forces at grid B3 and E5. Enemy forces detected at grid D7 and F2.', messages, onMessagesChange, disableDirectAiCalls = false }: Props) {
     const [inputValue, setInputValue] = useState('');
     const [loading, setLoading] = useState(false);
     const [aiServerOnline, setAiServerOnline] = useState<boolean | null>(null); // null = checking
@@ -169,6 +170,18 @@ export function SecureCommsConsole({ isOpen, onClose, battlefieldContext = 'Sect
 
         onMessagesChange((prev) => [...prev, userMsg]);
         setInputValue('');
+
+        if (disableDirectAiCalls) {
+            const sysMsg: ChatMessage = {
+                id: `sys-${Date.now()}`,
+                source: 'SYSTEM',
+                body: 'Direct AI chat is disabled in simulation-authoritative mode. Submit actions via Command Link to process turn simulation and AI narrative together.',
+                timestamp: nowTs(),
+            };
+            onMessagesChange((prev) => [...prev, sysMsg]);
+            return;
+        }
+
         setLoading(true);
 
         try {

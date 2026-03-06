@@ -9,11 +9,26 @@ interface Unit {
   label: string;
 }
 
-interface TacticalMapProps {
-  units: Unit[];
+interface UnitMovement {
+  unit_id: string;
+  from: { x: number; y: number };
+  to: { x: number; y: number };
 }
 
-export function TacticalMap({ units }: TacticalMapProps) {
+interface CombatEvent {
+  attacker_id: string;
+  defender_id: string;
+  outcome: string;
+  damage: number;
+}
+
+interface TacticalMapProps {
+  units: Unit[];
+  movements?: UnitMovement[];
+  combatEvents?: CombatEvent[];
+}
+
+export function TacticalMap({ units, movements = [], combatEvents = [] }: TacticalMapProps) {
   // 12x8 grid
   const gridRows = 8;
   const gridCols = 12;
@@ -57,7 +72,52 @@ export function TacticalMap({ units }: TacticalMapProps) {
           strokeOpacity="0.4"
           markerEnd="url(#arrowhead)"
         />
+
+        {movements.map((mv, idx) => (
+          <line
+            key={`${mv.unit_id}-${idx}`}
+            x1={`${(mv.from.x / gridCols) * 100}%`}
+            y1={`${(mv.from.y / gridRows) * 100}%`}
+            x2={`${(mv.to.x / gridCols) * 100}%`}
+            y2={`${(mv.to.y / gridRows) * 100}%`}
+            stroke={mv.unit_id.startsWith('e') ? '#EF4444' : '#22C55E'}
+            strokeWidth="1.5"
+            strokeDasharray="5 4"
+            fill="none"
+            strokeOpacity="0.8"
+            markerEnd="url(#arrowhead)"
+            style={{ transition: 'all 600ms ease' }}
+          />
+        ))}
       </svg>
+
+      {/* Combat flash markers */}
+      {combatEvents.map((ev, idx) => {
+        const defender = units.find((u) => u.id === ev.defender_id);
+        if (!defender) return null;
+        return (
+          <div
+            key={`${ev.attacker_id}-${ev.defender_id}-${idx}`}
+            className="absolute pointer-events-none"
+            style={{
+              left: `${(defender.x / gridCols) * 100}%`,
+              top: `${(defender.y / gridRows) * 100}%`,
+              transform: 'translate(-50%, -50%)',
+            }}
+          >
+            <div
+              className="w-8 h-8 rounded-full"
+              style={{
+                background: 'radial-gradient(circle, rgba(239,68,68,0.75) 0%, rgba(239,68,68,0.15) 55%, rgba(239,68,68,0) 100%)',
+                animation: 'pulse 900ms ease-out',
+              }}
+            />
+            <div className="absolute -top-4 left-1/2 -translate-x-1/2 text-[9px] font-bold text-[#EF4444] font-mono">
+              -{ev.damage}
+            </div>
+          </div>
+        );
+      })}
 
       {/* Units */}
       {units.map((unit) => (

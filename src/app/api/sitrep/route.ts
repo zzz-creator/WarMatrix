@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
 
-const AI_SERVER_BASE = 'http://127.0.0.1:8000';
+const AI_SERVER_BASE = process.env.AI_SERVER_BASE_URL ?? 'http://127.0.0.1:8000';
+const SIM_SERVER_BASE = process.env.SIM_SERVER_BASE_URL ?? 'http://127.0.0.1:8001';
 const INFERENCE_TIMEOUT_MS = 300_000; // 5 min — CPU inference can be slow
 const HEALTH_TIMEOUT_MS = 5_000;     // 5 s  — quick ping only
+const SIM_TIMEOUT_MS = 60_000;
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -22,6 +24,13 @@ interface SitrepRequestBody {
     temperature?: number;
     /** Nucleus sampling top-p (clamped to 0.1-1.0). */
     top_p?: number;
+
+    // Simulation-tick payload
+    command?: unknown;
+    current_state?: unknown;
+    end_simulation?: boolean;
+    initialize_scenario?: boolean;
+    scenario?: unknown;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -69,6 +78,18 @@ export async function GET() {
 
 // ─── POST /api/sitrep ─────────────────────────────────────────────────────────
 
+function isSimulationTickRequest(raw: SitrepRequestBody): boolean {
+    return (
+        raw.command !== undefined ||
+        raw.current_state !== undefined ||
+        raw.end_simulation === true
+    );
+}
+
+function isScenarioInitializationRequest(raw: SitrepRequestBody): boolean {
+    return raw.initialize_scenario === true || raw.scenario !== undefined;
+}
+
 export async function POST(req: Request) {
     // 1. Parse incoming body
     let raw: SitrepRequestBody;
@@ -78,7 +99,93 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
     }
 
-    // 2. Validate required fields
+    // 2. Branch by payload type
+    if (isScenarioInitializationRequest(raw)) {
+        const payload = {
+            scenario: raw.scenario,
+        };
+
+        try {
+            const res = await fetch(`${SIM_SERVER_BASE}/api/initialize_scenario`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+                signal: AbortSignal.timeout(SIM_TIMEOUT_MS),
+            });
+
+            const data = await res.json();
+            return NextResponse.json(data, { status: res.status });
+        } catch (err: unknown) {
+            const isTimeout =
+                (err instanceof DOMException && err.name === 'TimeoutError') ||
+                (err instanceof Error && err.name === 'TimeoutError');
+
+            if (isTimeout) {
+                return NextResponse.json(
+                    {
+                        error: 'scenario_initialization_timeout',
+                        details: `Scenario initialization timed out after ${SIM_TIMEOUT_MS / 1000}s.`,
+                    },
+                    { status: 504 }
+                );
+            }
+
+            return NextResponse.json(
+                {
+                    error: 'simulation_backend_offline',
+                    details: 'Could not reach the Python simulation backend. Is backend/main.py running on port 8001?',
+                },
+                { status: 503 }
+            );
+        }
+    }
+
+    if (isSimulationTickRequest(raw)) {
+        const payload = {
+            command: raw.command ?? raw.directive ?? 'hold position',
+            current_state: raw.current_state,
+            end_simulation: raw.end_simulation ?? false,
+            max_new_tokens: clamp(raw.max_new_tokens, 32, 512, 180),
+            temperature: clamp(raw.temperature, 0.0, 2.0, 0.45),
+            top_p: clamp(raw.top_p, 0.1, 1.0, 0.9),
+        };
+
+        try {
+            const res = await fetch(`${SIM_SERVER_BASE}/api/simulate_tick`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+                signal: AbortSignal.timeout(SIM_TIMEOUT_MS),
+            });
+
+            const data = await res.json();
+            return NextResponse.json(data, { status: res.status });
+        } catch (err: unknown) {
+            const isTimeout =
+                (err instanceof DOMException && err.name === 'TimeoutError') ||
+                (err instanceof Error && err.name === 'TimeoutError');
+
+            if (isTimeout) {
+                return NextResponse.json(
+                    {
+                        error: 'simulation_timeout',
+                        details: `Simulation backend did not respond within ${SIM_TIMEOUT_MS / 1000}s.`,
+                    },
+                    { status: 504 }
+                );
+            }
+
+            return NextResponse.json(
+                {
+                    error: 'simulation_backend_offline',
+                    details: 'Could not reach the Python simulation backend. Is backend/main.py running on port 8001?',
+                },
+                { status: 503 }
+            );
+        }
+    }
+
+    // 3. Validate required fields for AI-only endpoint
     const directive = (raw.directive ?? '').trim();
     const battlefield_data = (raw.battlefield_data ?? '').trim();
 
@@ -89,7 +196,7 @@ export async function POST(req: Request) {
         );
     }
 
-    // 3. Structure / enrich the payload before forwarding
+    // 4. Structure / enrich the payload before forwarding
     const payload = {
         instruction: buildInstruction(directive || 'Generate a tactical SITREP.', raw.mode),
         battlefield_data: battlefield_data || directive,
@@ -98,7 +205,7 @@ export async function POST(req: Request) {
         top_p: clamp(raw.top_p, 0.1, 1.0, 0.9),
     };
 
-    // 4. Forward to the Python AI server
+    // 5. Forward to the Python AI server
     try {
         const res = await fetch(`${AI_SERVER_BASE}/api/sitrep`, {
             method: 'POST',
