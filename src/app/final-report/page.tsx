@@ -350,7 +350,7 @@ export default function FinalMissionReport() {
                         {/* RETURN BUTTON */}
                         <div className="px-6 py-12 border-t border-[#1F6FEB]/20 bg-[#0D1525]/90 flex justify-center">
                             <button
-                                onClick={() => router.push('/home')}
+                                onClick={() => router.push('/console')}
                                 className="group relative px-12 py-4 bg-[#0D223A] border border-[#1F6FEB]/40 hover:border-[#3A8DFF]/60 rounded-sm transition-all duration-300"
                             >
                                 {/* Decorative corners */}

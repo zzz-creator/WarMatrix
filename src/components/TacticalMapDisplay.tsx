@@ -13,6 +13,8 @@ interface ScenarioUnit {
     label: string;
     assetClass?: string;
     allianceRole?: string;
+    hp?: number;
+    maxHp?: number;
 }
 
 interface UnitMovement {
@@ -38,6 +40,8 @@ interface TacticalMapDisplayProps {
     mapPeaks?: { cx: number; cy: number; h: number; r2: number }[];
     movements?: UnitMovement[];
     combatEvents?: CombatEvent[];
+    unitHpById?: Record<string, { hp: number; maxHp: number }>;
+    objectiveProgressById?: Record<string, { friendly: number; enemy: number; controller: 'FRIENDLY' | 'ENEMY' | 'NEUTRAL' }>;
     onEndSimulation?: () => void;
 }
 
@@ -207,6 +211,8 @@ export function TacticalMapDisplay({
     mapPeaks,
     movements = [],
     combatEvents = [],
+    unitHpById,
+    objectiveProgressById,
     onEndSimulation,
 }: TacticalMapDisplayProps) {
     const tc: TC = TERRAIN_CONFIG[terrainType as TerrainKey] ?? TERRAIN_CONFIG.Highland;
@@ -464,14 +470,31 @@ export function TacticalMapDisplay({
             .map((ev) => {
                 const target = unitCoords.find((u) => u.id === ev.defender_id) || unitCoords.find((u) => u.id === ev.attacker_id);
                 if (!target) return null;
+
+                const targetIsFriendly = target.type === 'FRIENDLY' || target.allianceRole === 'FRIENDLY';
+                const outerFill = targetIsFriendly ? 'rgba(59,130,246,0.28)' : 'rgba(239,68,68,0.26)';
+                const innerFill = targetIsFriendly ? 'rgba(147,197,253,0.90)' : 'rgba(248,113,113,0.85)';
+                const textFill = targetIsFriendly ? '#BFDBFE' : '#FCA5A5';
+
                 return {
                     key: `${ev.attacker_id}-${ev.defender_id}-${ev.damage}-${ev.outcome}`,
                     x: target.px,
                     y: target.py,
                     damage: ev.damage,
+                    outerFill,
+                    innerFill,
+                    textFill,
                 };
             })
-            .filter(Boolean) as Array<{ key: string; x: number; y: number; damage: number }>;
+            .filter(Boolean) as Array<{
+                key: string;
+                x: number;
+                y: number;
+                damage: number;
+                outerFill: string;
+                innerFill: string;
+                textFill: string;
+            }>;
     }, [combatEvents, unitCoords]);
 
     const colAxis = Array.from({ length: COLS }, (_, i) => i + 1);
@@ -498,6 +521,69 @@ export function TacticalMapDisplay({
             case 'Sandstorm': return '1.2 KM';
             default: return '8.5 KM';
         }
+    };
+
+    const getUnitAffiliation = (unit: ScenarioUnit): 'Friendly' | 'Enemy' | 'Objective' => {
+        if (unit.type === 'FRIENDLY' || unit.allianceRole === 'FRIENDLY') return 'Friendly';
+        if (unit.type === 'ENEMY' || unit.allianceRole === 'ENEMY') return 'Enemy';
+        return 'Objective';
+    };
+
+    const getUnitTypeLabel = (unit: ScenarioUnit): string => {
+        if (unit.assetClass && unit.assetClass.trim().length > 0) return unit.assetClass;
+        if (unit.type === 'OBJECTIVE' || unit.allianceRole === 'OBJECTIVE') return 'Objective';
+        if (unit.type === 'FRIENDLY' || unit.allianceRole === 'FRIENDLY') return 'Infantry';
+        if (unit.type === 'ENEMY' || unit.allianceRole === 'ENEMY') return 'Infantry';
+        return 'Objective';
+    };
+
+    const cleanUnitLabel = (label: string): string => {
+        // Remove legacy status markers like " [100]" from older mapping formats.
+        return label.replace(/\s*\[\d+\]\s*$/, '').trim();
+    };
+
+    const getUnitDescriptor = (unit: ScenarioUnit): string => {
+        const affiliation = getUnitAffiliation(unit);
+        const unitType = getUnitTypeLabel(unit);
+        if (affiliation.toLowerCase() === unitType.toLowerCase()) {
+            return affiliation;
+        }
+        return `${affiliation} - ${unitType}`;
+    };
+
+    const getHpLabel = (unit: ScenarioUnit): string => {
+        const hpFromState = unitHpById?.[unit.id];
+        if (hpFromState && typeof hpFromState.hp === 'number') {
+            const maxHp = typeof hpFromState.maxHp === 'number' ? hpFromState.maxHp : 100;
+            return `HP: ${hpFromState.hp}/${maxHp}`;
+        }
+
+        if (typeof unit.hp === 'number') {
+            const maxHp = typeof unit.maxHp === 'number' ? unit.maxHp : 100;
+            return `HP: ${unit.hp}/${maxHp}`;
+        }
+        return 'HP: N/A';
+    };
+
+    const getObjectiveProgressLabel = (unit: ScenarioUnit): string => {
+        const progress = objectiveProgressById?.[unit.id];
+        if (!progress) return 'Capture: F 0 / E 0 (Neutral)';
+
+        const controllerLabel =
+            progress.controller === 'FRIENDLY'
+                ? 'Friendly'
+                : progress.controller === 'ENEMY'
+                    ? 'Enemy'
+                    : 'Neutral';
+
+        return `Capture: F ${progress.friendly} / E ${progress.enemy} (${controllerLabel})`;
+    };
+
+    const getStatusLine = (unit: ScenarioUnit): string => {
+        if (unit.type === 'OBJECTIVE' || unit.allianceRole === 'OBJECTIVE') {
+            return getObjectiveProgressLabel(unit);
+        }
+        return getHpLabel(unit);
     };
 
     return (
@@ -913,36 +999,48 @@ export function TacticalMapDisplay({
                             <circle cx={mv.x2} cy={mv.y2} r="1.9" fill={mv.unit_id.startsWith('e') ? '#EF4444' : '#3B82F6'} />
                         </g>
                     ))}
+
+                    {/* ── Combat flash overlays (map-space so pan/zoom stays synced) ── */}
+                    {combatFlashPoints.map((pt, i) => (
+                        <g key={`${pt.key}-${i}`} pointerEvents="none" transform={`translate(${pt.x} ${pt.y})`}>
+                            <circle
+                                cx="0"
+                                cy="0"
+                                r="10"
+                                fill={pt.outerFill}
+                                style={{
+                                    animation: 'wmCombatPulse 850ms ease-out forwards',
+                                    transformOrigin: 'center',
+                                    transformBox: 'fill-box',
+                                }}
+                            />
+                            <circle
+                                cx="0"
+                                cy="0"
+                                r="4.5"
+                                fill={pt.innerFill}
+                                style={{
+                                    animation: 'wmCombatPulse 850ms ease-out forwards',
+                                    transformOrigin: 'center',
+                                    transformBox: 'fill-box',
+                                }}
+                            />
+                            <text
+                                x="0"
+                                y="-12"
+                                textAnchor="middle"
+                                className="font-mono"
+                                fontSize="9"
+                                fontWeight="700"
+                                fill={pt.textFill}
+                                style={{ animation: 'wmDamageFloat 900ms ease-out forwards' }}
+                            >
+                                -{pt.damage}
+                            </text>
+                        </g>
+                    ))}
                 </g>
             </svg>
-
-            {/* Combat flash overlays */}
-            {combatFlashPoints.map((pt) => (
-                <div
-                    key={pt.key}
-                    className="absolute pointer-events-none"
-                    style={{
-                        left: `${(pt.x / VW) * 100}%`,
-                        top: `${(pt.y / VH) * 100}%`,
-                        transform: 'translate(-50%, -50%)',
-                        zIndex: 35,
-                    }}
-                >
-                    <div
-                        className="w-8 h-8 rounded-full"
-                        style={{
-                            background: 'radial-gradient(circle, rgba(239,68,68,0.85) 0%, rgba(239,68,68,0.16) 55%, rgba(239,68,68,0) 100%)',
-                            animation: 'wmCombatPulse 850ms ease-out',
-                        }}
-                    />
-                    <div
-                        className="absolute left-1/2 -top-3 text-[9px] font-bold text-[#FCA5A5] font-mono"
-                        style={{ animation: 'wmDamageFloat 900ms ease-out' }}
-                    >
-                        -{pt.damage}
-                    </div>
-                </div>
-            ))}
 
             {/* ── Bottom bar ── */}
             <div className="absolute bottom-3 left-3 right-3 z-20 flex items-center justify-between pointer-events-none">
@@ -987,11 +1085,14 @@ export function TacticalMapDisplay({
                     }}
                 >
                     <div className="text-[11px] font-mono font-bold text-white mb-1.5 whitespace-nowrap">
-                        {hoveredUnit.label}
+                        {cleanUnitLabel(hoveredUnit.label)} ({getUnitAffiliation(hoveredUnit)})
                     </div>
                     <div className="flex flex-col gap-1">
+                        <span className="text-[9px] font-mono text-[#E6EDF3]">
+                            {getStatusLine(hoveredUnit)}
+                        </span>
                         <span className="text-[9px] font-mono font-bold tracking-widest uppercase" style={{ color: hoveredUnit.type === 'FRIENDLY' || hoveredUnit.allianceRole === 'FRIENDLY' ? '#3B82F6' : hoveredUnit.type === 'ENEMY' || hoveredUnit.allianceRole === 'ENEMY' ? '#EF4444' : '#F59E0B' }}>
-                            {hoveredUnit.allianceRole || hoveredUnit.type} — {hoveredUnit.assetClass || 'Unknown'}
+                            {getUnitDescriptor(hoveredUnit)}
                         </span>
                         <span className="text-[9px] font-mono text-gray-400">
                             Grid Reference: [{hoveredUnit.x}, {hoveredUnit.y}]

@@ -99,6 +99,7 @@ function AccordionPanel({
         >
             {/* Header */}
             <button
+                suppressHydrationWarning
                 className="w-full flex items-center gap-2 px-3 py-2.5 text-left group"
                 style={{ outline: 'none' }}
                 onClick={() => onToggle(id)}
@@ -208,13 +209,18 @@ function LastKnownCoordsPanel({ activeScenario }: { activeScenario: ActiveScenar
     );
 
     // Build a simple timestamp anchored to the current scenario / turn
-    const timestamp = useMemo(() => {
-        if (!activeScenario) return null;
+    const [timestamp, setTimestamp] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (!activeScenario) {
+            setTimestamp(null);
+            return;
+        }
         const now = new Date();
         const hh = String(now.getHours()).padStart(2, '0');
         const mm = String(now.getMinutes()).padStart(2, '0');
         const ss = String(now.getSeconds()).padStart(2, '0');
-        return `${hh}:${mm}:${ss}Z`;
+        setTimestamp(`${hh}:${mm}:${ss}Z`);
     }, [activeScenario]);
 
     const gridX = primaryEnemy?.x ?? null;
@@ -225,6 +231,7 @@ function LastKnownCoordsPanel({ activeScenario }: { activeScenario: ActiveScenar
         <div className="mt-1.5 rounded-sm overflow-hidden" style={{ border: '1px solid rgba(31,111,235,0.14)' }}>
             {/* Sub-header, clickable */}
             <button
+                suppressHydrationWarning
                 className="w-full flex items-center gap-2 px-2.5 py-1.5 text-left"
                 style={{
                     background: isExpanded ? 'rgba(31,111,235,0.10)' : 'rgba(10,14,28,0.60)',
