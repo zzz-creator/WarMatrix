@@ -64,8 +64,14 @@ CURRENT BATTLEFIELD SITUATION:
 
 Analyze the situation using standard military decision-making processes. Your analysis must be evidence-based, explaining HOW terrain, force ratios, and recent movements influence the projected outcomes.
 
-Provide your analysis in the following JSON format:
-{{jsonSchema output.schema}}`,
+Return your analysis as a single valid JSON object with exactly these fields:
+- strategicOverview: string
+- staffAnalysis: { maneuver: string, logistics: string, intelligence: string }
+- riskAssessment: string
+- predictedEnemyBehavior: string
+- recommendedActions: string[]
+
+Respond only with the JSON. No markdown fences, no commentary.`,
 });
 
 const receiveStrategicAnalysisFlow = ai.defineFlow(
