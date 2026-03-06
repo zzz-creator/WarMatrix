@@ -78,11 +78,11 @@ export default function WarMatrixPage() {
         command,
         success,
         risk,
-        outcome: `Mission phase complete. Units have repositioned following ${command.replace(/_/g, ' ')} directive. Objectives remain priority.`
+        outcome: `Mission turn ${turn + 1} synchronized. Battlefield conditions evolving. Tactical initiative maintained after processing "${command}".`
       });
 
       setStatus('ACTIVE');
-    }, 1500);
+    }, 1200);
   };
 
   return (
