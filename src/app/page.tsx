@@ -89,6 +89,18 @@ export default function WarMatrixPage() {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>(INITIAL_LOG);
   const widgetChatEndRef = React.useRef<HTMLDivElement>(null);
 
+  // ─── Combat Metrics State ────────────────────────────────────────────────────
+  const [combatMetrics, setCombatMetrics] = useState({
+    allyUnitsLost: 0,
+    allyInfantryCasualties: 0,
+    allyArmorDamaged: 0,
+    allySupportLost: 0,
+    enemyUnitsDestroyed: 0,
+    enemyUnitsCaptured: 0,
+    enemyArmorDestroyed: 0,
+    enemySupportNeutralized: 0,
+  });
+
   const handleBriefingGenerated = (title: string, briefing: string) => {
     const briefingMsg: ChatMessage = {
       id: `briefing-${Date.now()}`,
@@ -178,6 +190,16 @@ export default function WarMatrixPage() {
     });
     setTurn(1);
     setAnalysis(null);
+    setCombatMetrics({
+      allyUnitsLost: 0,
+      allyInfantryCasualties: 0,
+      allyArmorDamaged: 0,
+      allySupportLost: 0,
+      enemyUnitsDestroyed: 0,
+      enemyUnitsCaptured: 0,
+      enemyArmorDestroyed: 0,
+      enemySupportNeutralized: 0,
+    });
     toast({
       title: `Scenario Loaded`,
       description: `${scenario.scenarioTitle} — ${newUnits.length} units deployed on ${terrainType} terrain.`,
@@ -287,11 +309,66 @@ export default function WarMatrixPage() {
 
         // Update simulation state as well
         setTurn(prev => prev + 1);
-        setUnits(prev => prev.map(u => ({
-          ...u,
-          x: Math.max(1, Math.min(11, u.x + (Math.random() > 0.8 ? 1 : Math.random() < 0.2 ? -1 : 0))),
-          y: Math.max(1, Math.min(7, u.y + (Math.random() > 0.8 ? 1 : Math.random() < 0.2 ? -1 : 0)))
-        })));
+
+        // Simple combat simulation impact
+        const turnResults = {
+          allyUnitsLost: 0,
+          allyInfantryCasualties: 0,
+          allyArmorDamaged: 0,
+          allySupportLost: 0,
+          enemyUnitsDestroyed: 0,
+          enemyUnitsCaptured: 0,
+          enemyArmorDestroyed: 0,
+          enemySupportNeutralized: 0,
+        };
+
+        setUnits(prev => {
+          let nextUnits = [...prev];
+          // Jitter positions
+          nextUnits = nextUnits.map(u => ({
+            ...u,
+            x: Math.max(1, Math.min(11, u.x + (Math.random() > 0.8 ? 1 : Math.random() < 0.2 ? -1 : 0))),
+            y: Math.max(1, Math.min(7, u.y + (Math.random() > 0.8 ? 1 : Math.random() < 0.2 ? -1 : 0)))
+          }));
+
+          // 15% chance to lose an enemy unit, 10% chance to lose an ally unit
+          if (Math.random() > 0.85) {
+            const enemyUnits = nextUnits.filter(u => u.type === 'ENEMY');
+            if (enemyUnits.length > 0) {
+              const target = enemyUnits[Math.floor(Math.random() * enemyUnits.length)];
+              turnResults.enemyUnitsDestroyed += 1;
+              if (target.assetClass === 'Armor') turnResults.enemyArmorDestroyed += 1;
+              if (target.assetClass === 'Logistics' || target.assetClass === 'Command Unit') turnResults.enemySupportNeutralized += 1;
+              if (Math.random() > 0.8) turnResults.enemyUnitsCaptured += 1;
+              nextUnits = nextUnits.filter(u => u.id !== target.id);
+            }
+          }
+
+          if (Math.random() > 0.90) {
+            const friendlyUnits = nextUnits.filter(u => u.type === 'FRIENDLY');
+            if (friendlyUnits.length > 0) {
+              const target = friendlyUnits[Math.floor(Math.random() * friendlyUnits.length)];
+              turnResults.allyUnitsLost += 1;
+              turnResults.allyInfantryCasualties += Math.floor(Math.random() * 4) + 1;
+              if (target.assetClass === 'Armor') turnResults.allyArmorDamaged += 1;
+              if (target.assetClass === 'Logistics' || target.assetClass === 'Command Unit') turnResults.allySupportLost += 1;
+              nextUnits = nextUnits.filter(u => u.id !== target.id);
+            }
+          }
+
+          return nextUnits;
+        });
+
+        setCombatMetrics(prev => ({
+          allyUnitsLost: prev.allyUnitsLost + turnResults.allyUnitsLost,
+          allyInfantryCasualties: prev.allyInfantryCasualties + turnResults.allyInfantryCasualties,
+          allyArmorDamaged: prev.allyArmorDamaged + turnResults.allyArmorDamaged,
+          allySupportLost: prev.allySupportLost + turnResults.allySupportLost,
+          enemyUnitsDestroyed: prev.enemyUnitsDestroyed + turnResults.enemyUnitsDestroyed,
+          enemyUnitsCaptured: prev.enemyUnitsCaptured + turnResults.enemyUnitsCaptured,
+          enemyArmorDestroyed: prev.enemyArmorDestroyed + turnResults.enemyArmorDestroyed,
+          enemySupportNeutralized: prev.enemySupportNeutralized + turnResults.enemySupportNeutralized,
+        }));
 
         setLastResult({
           command,
@@ -413,10 +490,10 @@ export default function WarMatrixPage() {
           <TacticalWidget title="Ally Damage Report" icon={Zap}>
             <div className="flex flex-col gap-1">
               {[
-                { label: 'Units Lost', value: '3' },
-                { label: 'Infantry Casualties', value: '5' },
-                { label: 'Armor Damaged', value: '2' },
-                { label: 'Support Units Lost', value: '1' },
+                { label: 'Units Lost', value: combatMetrics.allyUnitsLost.toString() },
+                { label: 'Infantry Casualties', value: combatMetrics.allyInfantryCasualties.toString() },
+                { label: 'Armor Damaged', value: combatMetrics.allyArmorDamaged.toString() },
+                { label: 'Support Units Lost', value: combatMetrics.allySupportLost.toString() },
               ].map((item, i) => (
                 <div key={i} className="flex justify-between items-center py-0.5 border-b border-[#1F6FEB]/05 last:border-0">
                   <span className="text-[9px] text-[#9CA3AF] uppercase font-bold tracking-tighter">{item.label}</span>
@@ -429,10 +506,10 @@ export default function WarMatrixPage() {
           <TacticalWidget title="Enemy Damage Report" icon={Activity}>
             <div className="flex flex-col gap-1">
               {[
-                { label: 'Enemy Units Destroyed', value: '8' },
-                { label: 'Enemy Units Captured', value: '2' },
-                { label: 'Enemy Armor Destroyed', value: '3' },
-                { label: 'Enemy Support Units Neutralized', value: '1' },
+                { label: 'Enemy Units Destroyed', value: combatMetrics.enemyUnitsDestroyed.toString() },
+                { label: 'Enemy Units Captured', value: combatMetrics.enemyUnitsCaptured.toString() },
+                { label: 'Enemy Armor Destroyed', value: combatMetrics.enemyArmorDestroyed.toString() },
+                { label: 'Enemy Support Units Neutralized', value: combatMetrics.enemySupportNeutralized.toString() },
               ].map((item, i) => (
                 <div key={i} className="flex justify-between items-center py-0.5 border-b border-[#1F6FEB]/05 last:border-0">
                   <span className="text-[9px] text-[#9CA3AF] uppercase font-bold tracking-tighter">{item.label}</span>
