@@ -1,26 +1,53 @@
+import numpy as np
 import random
 
+from .probability import compute_success_probability
+from .enemy_model import enemy_action
+from .actions import ACTIONS
+from .transition import apply_action, apply_enemy_action
 
-def _clamp(value: float, low: float = 0.0, high: float = 1.0) -> float:
-	return max(low, min(high, value))
 
+def run_monte_carlo(state, rollouts=400, steps=6):
 
-def monte_carlo_rollout(state: dict, runs: int = 200) -> dict:
-	"""Estimate expected success/risk after uncertainty over short horizon."""
-	base_success = float(state.get("success", 0.5))
-	base_risk = float(state.get("risk", 0.5))
+    successes = []
 
-	# Small random perturbations around current values to model tactical uncertainty.
-	success_samples = []
-	risk_samples = []
-	for _ in range(max(1, runs)):
-		success_samples.append(_clamp(base_success + random.uniform(-0.08, 0.08)))
-		risk_samples.append(_clamp(base_risk + random.uniform(-0.08, 0.08)))
+    for _ in range(rollouts):
 
-	expected_success = sum(success_samples) / len(success_samples)
-	expected_risk = sum(risk_samples) / len(risk_samples)
+        sim_state = state.copy()
 
-	return {
-		"expected_success": round(expected_success, 4),
-		"expected_risk": round(expected_risk, 4),
-	}
+        player_turn = True
+
+        for _ in range(steps):
+
+            if player_turn:
+
+                # Strategic bias toward offensive moves
+                action = random.choices(
+                    ACTIONS,
+                    weights=[0.25, 0.25, 0.35, 0.15]  # RECON, ARTILLERY, ADVANCE, DEFEND
+                )[0]
+
+                sim_state = apply_action(sim_state, action)
+
+            else:
+
+                enemy = enemy_action()
+                sim_state = apply_enemy_action(sim_state, enemy)
+
+            sim_state.success_probability = compute_success_probability(sim_state)
+
+            player_turn = not player_turn
+
+        successes.append(sim_state.success_probability)
+
+    successes = np.array(successes)
+
+    expected_success = float(successes.mean())
+    expected_risk = float(1 - expected_success)
+    uncertainty = float(successes.std())
+
+    return {
+        "expected_success": expected_success,
+        "expected_risk": expected_risk,
+        "uncertainty": uncertainty,
+    }

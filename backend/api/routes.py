@@ -1,24 +1,52 @@
 from fastapi import APIRouter
-from engine.monte_carlo import monte_carlo_rollout
+
+from engine.game_state import GameState, get_state, update_state
 from engine.transition import apply_action
+from engine.monte_carlo import run_monte_carlo
+from engine.mcts import run_mcts
+from engine.strategy import strategic_override
 
 router = APIRouter()
 
 
-@router.post("/simulate")
+class SimulationRequest(GameState):
+    action: str
+
+
+@router.post("/simulate_turn")
 def simulate_turn(payload: dict):
 
-    state = payload["state"]
-    action = payload["action"]
+    action = payload.get("action")
 
-    new_state = apply_action(state, action)
+    if not action:
+        return {"error": "No action provided"}
 
-    mc_result = monte_carlo_rollout(new_state)
+    # Get current battlefield state
+    state = get_state()
 
-    new_state["success"] = mc_result["expected_success"]
-    new_state["risk"] = mc_result["expected_risk"]
+    # Apply player action
+    state = apply_action(state, action)
+
+    # Run Monte Carlo simulation
+    sim = run_monte_carlo(state)
+
+    # Strategic rule layer
+    override = strategic_override(state)
+
+    if override:
+        best_action = override
+    else:
+        best_action = run_mcts(state)
+
+    # Update state with simulation results
+    state.success_probability = sim["expected_success"]
+    state.operational_risk = sim["expected_risk"]
+
+    # Save updated state
+    update_state(state)
 
     return {
-        "state": new_state,
-        "analysis_input": new_state
+        "state": state.dict(),
+        "simulation": sim,
+        "recommended_next_action": best_action
     }

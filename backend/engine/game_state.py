@@ -1,15 +1,63 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, validator
+from typing import Dict
+
+
+def _clamp(v: float) -> float:
+    return max(0.0, min(1.0, float(v)))
 
 
 class GameState(BaseModel):
+    morale: float = Field(0.5, ge=0.0, le=1.0)
+    supply: float = Field(0.5, ge=0.0, le=1.0)
+    operational_risk: float = Field(0.5, ge=0.0, le=1.0)
+    success_probability: float = Field(0.5, ge=0.0, le=1.0)
+    mobility: float = Field(0.5, ge=0.0, le=1.0)
+    communications: float = Field(0.5, ge=0.0, le=1.0)
+    fires: float = Field(0.5, ge=0.0, le=1.0)
+    force_ratio: float = Field(0.5, ge=0.0, le=1.0)
 
-    morale: float
-    supply: float
-    risk: float
-    success: float
+    @validator("morale", "supply", "operational_risk", "success_probability", "mobility", "communications", "fires", "force_ratio", pre=True)
+    def _ensure_clamped(cls, v):
+        return _clamp(v)
 
-    mobility: float
-    comms: float
-    fires: float
+    def clamp(self) -> "GameState":
+        return GameState(
+            morale=_clamp(self.morale),
+            supply=_clamp(self.supply),
+            operational_risk=_clamp(self.operational_risk),
+            success_probability=_clamp(self.success_probability),
+            mobility=_clamp(self.mobility),
+            communications=_clamp(self.communications),
+            fires=_clamp(self.fires),
+            force_ratio=_clamp(self.force_ratio),
+        )
 
-    force_ratio: float
+    def as_dict(self) -> Dict:
+        return self.dict()
+
+
+# Simple module-level stored state for convenience (can be replaced by DB)
+_CURRENT_STATE = GameState(
+    morale=0.72,
+    supply=0.65,
+    operational_risk=0.40,
+    success_probability=0.55,
+    mobility=0.70,
+    communications=0.82,
+    fires=0.75,
+    force_ratio=0.65,
+)
+
+
+def get_state() -> GameState:
+    return _CURRENT_STATE.copy()
+
+
+def update_state(new_state: GameState) -> None:
+    global _CURRENT_STATE
+    if isinstance(new_state, dict):
+        _CURRENT_STATE = GameState(**new_state)
+    elif isinstance(new_state, GameState):
+        _CURRENT_STATE = new_state
+    else:
+        _CURRENT_STATE = GameState(**dict(new_state))
