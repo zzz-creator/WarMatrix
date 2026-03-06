@@ -193,10 +193,10 @@ function buildStructuredCommand(rawInput: string, state: BattlefieldState): Stru
     if (state.objectives.length > 0) {
       const nearestObj = actor
         ? state.objectives.reduce((best, o) => {
-            const bd = Math.hypot(best.x - actor.x, best.y - actor.y);
-            const od = Math.hypot(o.x - actor.x, o.y - actor.y);
-            return od < bd ? o : best;
-          }, state.objectives[0])
+          const bd = Math.hypot(best.x - actor.x, best.y - actor.y);
+          const od = Math.hypot(o.x - actor.x, o.y - actor.y);
+          return od < bd ? o : best;
+        }, state.objectives[0])
         : state.objectives[0];
 
       target.objective_id = nearestObj.id;
@@ -205,10 +205,10 @@ function buildStructuredCommand(rawInput: string, state: BattlefieldState): Stru
     } else if (enemyAlive.length > 0) {
       const nearestEnemy = actor
         ? enemyAlive.reduce((best, e) => {
-            const bd = Math.hypot(best.x - actor.x, best.y - actor.y);
-            const ed = Math.hypot(e.x - actor.x, e.y - actor.y);
-            return ed < bd ? e : best;
-          }, enemyAlive[0])
+          const bd = Math.hypot(best.x - actor.x, best.y - actor.y);
+          const ed = Math.hypot(e.x - actor.x, e.y - actor.y);
+          return ed < bd ? e : best;
+        }, enemyAlive[0])
         : enemyAlive[0];
       target.x = nearestEnemy.x;
       target.y = nearestEnemy.y;
@@ -220,10 +220,10 @@ function buildStructuredCommand(rawInput: string, state: BattlefieldState): Stru
     const chosenEnemy = namedEnemy ||
       (actor
         ? enemyAlive.reduce((best, e) => {
-            const bd = Math.hypot(best.x - actor.x, best.y - actor.y);
-            const ed = Math.hypot(e.x - actor.x, e.y - actor.y);
-            return ed < bd ? e : best;
-          }, enemyAlive[0])
+          const bd = Math.hypot(best.x - actor.x, best.y - actor.y);
+          const ed = Math.hypot(e.x - actor.x, e.y - actor.y);
+          return ed < bd ? e : best;
+        }, enemyAlive[0])
         : enemyAlive[0]);
 
     target.unit_id = chosenEnemy.id;
@@ -1042,7 +1042,7 @@ export default function WarMatrixPage() {
           >
             <div className="flex-1 flex flex-col min-h-0">
               {/* Message Feed */}
-              <div className="flex-1 overflow-y-auto custom-scrollbar py-2 flex flex-col gap-2">
+              <div className="flex-1 overflow-y-auto warmatrix-scrollbar py-2 flex flex-col gap-2">
                 {chatMessages.map((msg) => {
                   const style = WIDGET_SOURCE_STYLE[msg.source as MessageSource] || WIDGET_SOURCE_STYLE.SYSTEM;
                   const isUser = msg.source === 'COMMAND_INPUT';
@@ -1050,8 +1050,8 @@ export default function WarMatrixPage() {
                     <div key={msg.id} className={`flex flex-col gap-0.5 ${isUser ? 'items-end' : 'items-start'}`}>
                       <div className="flex items-center gap-1.5 px-0.5">
                         {!isUser && <div className="w-1 h-1 rounded-full" style={{ background: style.dot, boxShadow: `0 0 3px ${style.dot}` }} />}
-                        <span className="text-[7px] font-bold uppercase tracking-wider" style={{ color: style.color }}>{style.label}</span>
-                        <span className="text-[6px] font-mono text-[#4B5563]">{msg.timestamp}</span>
+                        <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: style.color }}>{style.label}</span>
+                        <span className="text-[8px] font-mono text-[#4B5563]">{msg.timestamp}</span>
                         {isUser && <div className="w-1 h-1 rounded-full" style={{ background: style.dot }} />}
                       </div>
                       <div
@@ -1065,11 +1065,11 @@ export default function WarMatrixPage() {
                         }}
                       >
                         {msg.headline && (
-                          <p className="text-[7px] font-bold uppercase tracking-wider text-[#E6EDF3] mb-1 leading-tight">
+                          <p className="text-[9px] font-bold uppercase tracking-wider text-[#E6EDF3] mb-1 leading-tight">
                             {msg.headline}
                           </p>
                         )}
-                        <p className="text-[9px] font-mono leading-relaxed text-[#9CA3AF]">
+                        <p className="text-[10px] font-mono leading-relaxed text-[#9CA3AF]">
                           {msg.body}
                         </p>
                       </div>
@@ -1089,7 +1089,7 @@ export default function WarMatrixPage() {
                       value={inputValue}
                       onChange={(e) => setInputValue(e.target.value)}
                       placeholder={activeScenario ? 'Enter tactical directive to initiate system simulation...' : 'System ready. Enter command link directive...'}
-                      className="w-full h-8 bg-[#0D223A]/30 border border-[#1F6FEB]/20 rounded-sm pl-8 pr-2 text-[9px] font-mono text-white placeholder:text-[#374151] focus:outline-none focus:border-[#3A8DFF]/40 transition-all"
+                      className="w-full h-8 bg-[#0D223A]/30 border border-[#1F6FEB]/20 rounded-sm pl-8 pr-2 text-[10px] font-mono text-white placeholder:text-[#374151] focus:outline-none focus:border-[#3A8DFF]/40 transition-all"
                       disabled={status === 'PROCESSING'}
                     />
                   </div>

@@ -341,20 +341,20 @@ export function ScenarioBuilder({ units, onUpdateUnits, isOpen, onClose, onScena
     accentColor: string;
   }[] = [
       {
-        mode: 'CUSTOM',
-        icon: Wrench,
-        title: 'Custom Scenario Builder',
-        description: 'Manually configure battlefield units, objectives, and deployment positions.',
-        available: true,
-        accentColor: '#1F6FEB',
-      },
-      {
         mode: 'AI',
         icon: BrainCircuit,
         title: 'Random Scenario Generator',
         description: 'AI generates a full battlefield scenario from randomized parameters — terrain, forces, and objectives.',
         available: true,
         accentColor: '#8B5CF6',
+      },
+      {
+        mode: 'CUSTOM',
+        icon: Wrench,
+        title: 'Custom Scenario Builder',
+        description: 'Manually configure battlefield units, objectives, and deployment positions.',
+        available: true,
+        accentColor: '#1F6FEB',
       },
     ];
 
@@ -584,7 +584,7 @@ export function ScenarioBuilder({ units, onUpdateUnits, isOpen, onClose, onScena
 
                   {/* ──────── LEFT: DEPLOYMENT CONTROLS ──────── */}
                   <div className="flex flex-col gap-4">
-                    <h3 className="text-[9px] font-bold text-[#1F6FEB] uppercase tracking-[0.25em]">
+                    <h3 className="text-[10.5px] font-bold text-[#1F6FEB] uppercase tracking-[0.25em]">
                       Deployment Controls
                     </h3>
 

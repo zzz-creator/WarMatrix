@@ -19,13 +19,13 @@ export function TerrainIntelligencePanel() {
                 <div className="absolute top-3 left-4 right-4 flex items-center justify-between z-20">
                     <div className="flex items-center gap-2">
                         <div className="w-1.5 h-1.5 rounded-full bg-[#00C8FF] animate-pulse" style={{ boxShadow: '0 0 6px #00C8FF' }} />
-                        <span className="text-[9px] font-mono font-bold text-[#5BA8E0] uppercase tracking-widest">
+                        <span className="text-[10.5px] font-mono font-bold text-[#5BA8E0] uppercase tracking-widest">
                             TERRAIN INTEL MODULE — SECTOR ALPHA-9
                         </span>
                     </div>
                     <div className="flex items-center gap-3">
-                        <span className="text-[8px] font-mono text-[#1F6FEB]/60 uppercase tracking-wider">ELEV_MAP v2.4</span>
-                        <span className="text-[8px] font-mono text-[#00C8FF]/70 uppercase">◈ LIVE</span>
+                        <span className="text-[9px] font-mono text-[#1F6FEB]/60 uppercase tracking-wider">ELEV_MAP v2.4</span>
+                        <span className="text-[9.5px] font-mono text-[#00C8FF]/70 uppercase">◈ LIVE</span>
                     </div>
                 </div>
 
@@ -358,7 +358,7 @@ export function TerrainIntelligencePanel() {
                             key={label}
                             x={x}
                             y={y}
-                            fontSize="8"
+                            fontSize="9.5"
                             fontFamily="monospace"
                             fill="rgba(30,100,200,0.35)"
                             textAnchor="middle"
@@ -368,32 +368,32 @@ export function TerrainIntelligencePanel() {
                     ))}
 
                     {/* ─── ELEVATION LABELS on contour lines ─── */}
-                    <text x="320" y="170" fontSize="7" fontFamily="monospace" fill="rgba(0,160,220,0.40)" textAnchor="middle">2240m</text>
-                    <text x="240" y="302" fontSize="7" fontFamily="monospace" fill="rgba(0,160,220,0.35)" textAnchor="middle">1820m</text>
-                    <text x="362" y="290" fontSize="7" fontFamily="monospace" fill="rgba(0,180,240,0.45)" textAnchor="middle">2640m</text>
-                    <text x="636" y="218" fontSize="7" fontFamily="monospace" fill="rgba(0,180,240,0.40)" textAnchor="middle">2480m</text>
-                    <text x="504" y="236" fontSize="7" fontFamily="monospace" fill="rgba(0,190,255,0.55)" textAnchor="middle">3100m</text>
-                    <text x="500" y="300" fontSize="7" fontFamily="monospace" fill="rgba(80,220,255,0.65)" textAnchor="middle">PEAK</text>
+                    <text x="320" y="170" fontSize="8.5" fontFamily="monospace" fill="rgba(0,160,220,0.40)" textAnchor="middle">2240m</text>
+                    <text x="240" y="302" fontSize="8.5" fontFamily="monospace" fill="rgba(0,160,220,0.35)" textAnchor="middle">1820m</text>
+                    <text x="362" y="290" fontSize="8.5" fontFamily="monospace" fill="rgba(0,180,240,0.45)" textAnchor="middle">2640m</text>
+                    <text x="636" y="218" fontSize="8.5" fontFamily="monospace" fill="rgba(0,180,240,0.40)" textAnchor="middle">2480m</text>
+                    <text x="504" y="236" fontSize="8.5" fontFamily="monospace" fill="rgba(0,190,255,0.55)" textAnchor="middle">3100m</text>
+                    <text x="500" y="300" fontSize="8.5" fontFamily="monospace" fill="rgba(80,220,255,0.65)" textAnchor="middle">PEAK</text>
                 </svg>
 
                 {/* ─── BOTTOM STATUS BAR ─── */}
                 <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between z-20">
                     <div className="flex items-center gap-4">
-                        <span className="text-[8px] font-mono text-[#1F6FEB]/50 uppercase tracking-wider">COORD: 45.023°N / 122.451°E</span>
-                        <span className="text-[8px] font-mono text-[#1F6FEB]/40 uppercase">SCALE: 1:50,000</span>
+                        <span className="text-[9.5px] font-mono text-[#1F6FEB]/50 uppercase tracking-wider">COORD: 45.023°N / 122.451°E</span>
+                        <span className="text-[9.5px] font-mono text-[#1F6FEB]/40 uppercase">SCALE: 1:50,000</span>
                     </div>
                     <div className="flex items-center gap-3">
                         <div className="flex items-center gap-1.5">
                             <div className="w-5 h-px" style={{ background: 'rgba(0,200,255,0.7)', boxShadow: '0 0 4px rgba(0,200,255,0.5)' }} />
-                            <span className="text-[7px] font-mono text-[#3A8DFF]/50 uppercase">Contour</span>
+                            <span className="text-[8.5px] font-mono text-[#3A8DFF]/50 uppercase">Contour</span>
                         </div>
                         <div className="flex items-center gap-1.5">
                             <div className="w-1.5 h-1.5 rounded-full bg-[#00B4FF]/70" />
-                            <span className="text-[7px] font-mono text-[#3A8DFF]/50 uppercase">Node</span>
+                            <span className="text-[8.5px] font-mono text-[#3A8DFF]/50 uppercase">Node</span>
                         </div>
                         <div className="flex items-center gap-1.5">
                             <div className="w-4 border-t border-dashed border-[#1F6FEB]/50" />
-                            <span className="text-[7px] font-mono text-[#3A8DFF]/50 uppercase">Comms Link</span>
+                            <span className="text-[8.5px] font-mono text-[#3A8DFF]/50 uppercase">Comms Link</span>
                         </div>
                     </div>
                 </div>

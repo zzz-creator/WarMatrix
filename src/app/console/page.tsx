@@ -548,10 +548,10 @@ export default function WarMatrixPage() {
                   {chatMessages.slice(-5).map((msg) => (
                     <div key={msg.id} className="mb-2 last:mb-0">
                       <div className="flex items-center gap-1.5 mb-0.5">
-                        <span className="text-[7px] font-bold text-[#3A8DFF] uppercase tracking-wider">{msg.source}</span>
-                        <span className="text-[6px] font-mono text-[#4B5563]">{msg.timestamp}</span>
+                        <span className="text-[8.5px] font-bold text-[#3A8DFF] uppercase tracking-wider">{msg.source}</span>
+                        <span className="text-[7.5px] font-mono text-[#4B5563]">{msg.timestamp}</span>
                       </div>
-                      <p className="text-[10px] font-mono text-[#9CA3AF] whitespace-pre-wrap break-words">{msg.body}</p>
+                      <p className="text-[11.5px] font-mono text-[#9CA3AF] whitespace-pre-wrap break-words">{msg.body}</p>
                     </div>
                   ))}
                 </div>
@@ -563,14 +563,14 @@ export default function WarMatrixPage() {
                       value={inputValue}
                       onChange={(e) => setInputValue(e.target.value)}
                       placeholder="Input Operational Directive..."
-                      className="w-full h-9 bg-[#0D223A]/50 border border-[#1F6FEB]/30 rounded-sm pl-8 pr-2 text-[10px] font-mono text-white placeholder:text-[#4B5563] focus:outline-none focus:border-[#3A8DFF] transition-all"
+                      className="w-full h-10 bg-[#0D223A]/50 border border-[#1F6FEB]/30 rounded-sm pl-8 pr-2 text-[11.5px] font-mono text-white placeholder:text-[#4B5563] focus:outline-none focus:border-[#3A8DFF] transition-all"
                       disabled={status === 'PROCESSING' || battlefieldState?.ended}
                     />
                   </div>
                   <button
                     type="submit"
                     disabled={!inputValue.trim() || status === 'PROCESSING' || battlefieldState?.ended}
-                    className="w-10 h-9 bg-[#1A3B5D] hover:bg-[#3A8DFF] disabled:opacity-30 flex items-center justify-center rounded-sm border border-[#1F6FEB]/30 transition-all"
+                    className="w-10 h-10 bg-[#1A3B5D] hover:bg-[#3A8DFF] disabled:opacity-30 flex items-center justify-center rounded-sm border border-[#1F6FEB]/30 transition-all"
                   >
                     <Send className="w-3.5 h-3.5 text-[#3A8DFF]" />
                   </button>
@@ -578,7 +578,7 @@ export default function WarMatrixPage() {
                     type="button"
                     onClick={handleEndSimulation}
                     disabled={status === 'PROCESSING' || battlefieldState?.ended}
-                    className="h-9 px-3 bg-[#3B1A1A] hover:bg-[#7A2323] disabled:opacity-30 rounded-sm border border-[#EF4444]/40 text-[9px] font-bold uppercase tracking-wider text-[#FCA5A5]"
+                    className="h-10 px-3 bg-[#3B1A1A] hover:bg-[#7A2323] disabled:opacity-30 rounded-sm border border-[#EF4444]/40 text-[9px] font-bold uppercase tracking-wider text-[#FCA5A5]"
                   >
                     End
                   </button>
@@ -685,7 +685,7 @@ export default function WarMatrixPage() {
         onClose={() => setIsCommsConsoleOpen(false)}
         disableDirectAiCalls={true}
         battlefieldContext={`Turn ${turn}. ${(battlefieldState?.units ?? [])
-          .map((u) => `${u.label} (${u.faction}) at [${u.x},${u.y}]`) 
+          .map((u) => `${u.label} (${u.faction}) at [${u.x},${u.y}]`)
           .join(', ')}.`}
       />
 

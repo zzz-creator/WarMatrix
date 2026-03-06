@@ -120,7 +120,7 @@ function AccordionPanel({
                 />
 
                 <span
-                    className="flex-1 text-[9px] font-bold uppercase tracking-widest truncate"
+                    className="flex-1 text-[12.5px] font-bold uppercase tracking-widest truncate"
                     style={{ color: isOpen ? '#E6EDF3' : '#8B9BAF' }}
                 >
                     {title}
@@ -169,15 +169,15 @@ function DataRow({
     valueColor?: string;
 }) {
     return (
-        <div className="flex items-center justify-between gap-2 py-1 border-b border-[#1F6FEB]/08 last:border-0">
+        <div className="flex items-center justify-between gap-2 py-1.5 border-b border-[#1F6FEB]/08 last:border-0">
             <div className="flex items-center gap-1.5">
                 <Icon className="w-2.5 h-2.5 text-[#4B6A8A] shrink-0" />
-                <span className="text-[8px] uppercase font-bold tracking-wider text-[#6B7280]">
+                <span className="text-[11px] uppercase font-bold tracking-wider text-[#6B7280]">
                     {label}
                 </span>
             </div>
             <span
-                className="text-[9px] font-mono font-bold"
+                className="text-[12.5px] font-mono font-bold"
                 style={{ color: valueColor ?? '#C9D3E0' }}
             >
                 {value}
@@ -235,13 +235,13 @@ function LastKnownCoordsPanel({ activeScenario }: { activeScenario: ActiveScenar
             >
                 <MapPin className="w-2.5 h-2.5 shrink-0" style={{ color: isExpanded ? '#3A8DFF' : '#4B6A8A' }} />
                 <span
-                    className="flex-1 text-[8px] uppercase font-bold tracking-wider"
+                    className="flex-1 text-[11px] uppercase font-bold tracking-wider"
                     style={{ color: isExpanded ? '#9CA3AF' : '#6B7280' }}
                 >
                     Last Known Coords
                 </span>
                 {activeScenario && hasCoords && !isExpanded && (
-                    <span className="text-[8px] font-mono" style={{ color: '#C9D3E0' }}>
+                    <span className="text-[11.5px] font-mono" style={{ color: '#C9D3E0' }}>
                         {gridX},{gridY}
                     </span>
                 )}
@@ -260,7 +260,7 @@ function LastKnownCoordsPanel({ activeScenario }: { activeScenario: ActiveScenar
                     {activeScenario && hasCoords ? (
                         <div className="flex flex-col gap-1.5">
                             {/* Title */}
-                            <span className="text-[7px] font-bold uppercase tracking-[0.25em] text-[#4B6A8A] block">
+                            <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#4B6A8A] block">
                                 Last Known Coordinates
                             </span>
 
@@ -273,26 +273,26 @@ function LastKnownCoordsPanel({ activeScenario }: { activeScenario: ActiveScenar
                                 }}
                             >
                                 <div className="flex items-center justify-between">
-                                    <span className="text-[9px] font-bold uppercase tracking-wider text-[#6B7280]">X</span>
-                                    <span className="text-[13px] font-headline font-bold text-[#EF4444]">{gridX}</span>
+                                    <span className="text-[12.5px] font-bold uppercase tracking-wider text-[#6B7280]">X</span>
+                                    <span className="text-[17px] font-headline font-bold text-[#EF4444]">{gridX}</span>
                                 </div>
                                 <div className="h-px" style={{ background: 'rgba(239,68,68,0.12)' }} />
                                 <div className="flex items-center justify-between">
-                                    <span className="text-[9px] font-bold uppercase tracking-wider text-[#6B7280]">Y</span>
-                                    <span className="text-[13px] font-headline font-bold text-[#EF4444]">{gridY}</span>
+                                    <span className="text-[12.5px] font-bold uppercase tracking-wider text-[#6B7280]">Y</span>
+                                    <span className="text-[17px] font-headline font-bold text-[#EF4444]">{gridY}</span>
                                 </div>
                             </div>
 
                             {/* Timestamp */}
                             <div className="flex items-center gap-1.5 mt-0.5">
                                 <Clock className="w-2 h-2 text-[#4B5563]" />
-                                <span className="text-[7px] font-mono text-[#4B5563] uppercase tracking-wider">
+                                <span className="text-[10px] font-mono text-[#4B5563] uppercase tracking-wider">
                                     Last Update: {timestamp}
                                 </span>
                             </div>
                         </div>
                     ) : (
-                        <p className="text-[8px] font-mono text-[#374151] italic">
+                        <p className="text-[10px] font-mono text-[#374151] italic">
                             {activeScenario ? 'No enemy units detected.' : 'No scenario active.'}
                         </p>
                     )}
@@ -334,7 +334,7 @@ export function SidebarAccordion({
                 onToggle={handleToggle}
                 statusDot={activeScenario ? 'green' : 'gray'}
             >
-                <div className="flex flex-col gap-0.5">
+                <div className="flex flex-col gap-1.5">
                     <DataRow
                         icon={Thermometer}
                         label="Temperature"
@@ -378,7 +378,7 @@ export function SidebarAccordion({
                 statusDot={activeScenario ? 'red' : 'gray'}
                 overrideIconColor={activeId === 'intel' ? '#EF4444' : '#4B6A8A'}
             >
-                <div className="flex flex-col gap-0.5">
+                <div className="flex flex-col gap-1.5">
                     <DataRow
                         icon={Swords}
                         label="Detected Units"
@@ -408,7 +408,7 @@ export function SidebarAccordion({
                             border: '1px solid rgba(239,68,68,0.18)',
                         }}
                     >
-                        <p className="text-[8px] font-mono text-[#9CA3AF] leading-relaxed">
+                        <p className="text-[11.5px] font-mono text-[#9CA3AF] leading-relaxed">
                             INTEL DIVISION: {enemy} enemy unit{enemy !== 1 ? 's' : ''} identified on grid. Recommend immediate counter-response.
                         </p>
                     </div>
@@ -424,7 +424,7 @@ export function SidebarAccordion({
                 onToggle={handleToggle}
                 statusDot={activeScenario ? 'green' : 'gray'}
             >
-                <div className="flex flex-col gap-0.5">
+                <div className="flex flex-col gap-1.5">
                     <DataRow
                         icon={Users}
                         label="Infantry Units"
@@ -451,12 +451,12 @@ export function SidebarAccordion({
                     />
                 </div>
                 {activeScenario && (
-                    <div className="mt-2.5 flex items-center justify-between">
-                        <span className="text-[7px] font-mono text-[#4B5563] uppercase tracking-wider">
+                    <div className="mt-3 flex items-center justify-between">
+                        <span className="text-[10px] font-mono text-[#4B5563] uppercase tracking-wider">
                             Total Forces
                         </span>
-                        <span className="text-[11px] font-bold font-mono text-[#3B82F6]">
-                            {friendly} <span className="text-[#4B5563] text-[8px]">UNITS</span>
+                        <span className="text-[15px] font-bold font-mono text-[#3B82F6]">
+                            {friendly} <span className="text-[#4B5563] text-[11.5px]">UNITS</span>
                         </span>
                     </div>
                 )}
@@ -483,36 +483,36 @@ export function SidebarAccordion({
                                 }}
                             >
                                 <div className="flex items-center justify-between border-b border-[#1F6FEB]/10 pb-1.5 mb-0.5">
-                                    <span className="text-[10px] font-bold text-[#E6EDF3] uppercase tracking-wide">
+                                    <span className="text-[14px] font-bold text-[#E6EDF3] uppercase tracking-wide">
                                         {obj.label}
                                     </span>
-                                    <span className="text-[8px] font-mono text-[#F59E0B] uppercase font-bold">
+                                    <span className="text-[11.5px] font-mono text-[#F59E0B] uppercase font-bold">
                                         Active
                                     </span>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-y-1.5 gap-x-2">
+                                <div className="grid grid-cols-2 gap-y-2 gap-x-3">
                                     <div className="flex flex-col gap-0.5">
-                                        <span className="text-[7px] uppercase font-bold text-[#4B6A8A]">Type</span>
-                                        <span className="text-[9px] font-mono text-[#C9D3E0]">
+                                        <span className="text-[10px] uppercase font-bold text-[#4B6A8A]">Type</span>
+                                        <span className="text-[12.5px] font-mono text-[#C9D3E0]">
                                             {obj.assetClass === 'Infrastructure' ? 'Strategic' : obj.assetClass === 'Objective' ? 'Tactical' : 'Recon'}
                                         </span>
                                     </div>
                                     <div className="flex flex-col gap-0.5">
-                                        <span className="text-[7px] uppercase font-bold text-[#4B6A8A]">Location</span>
-                                        <span className="text-[9px] font-mono text-[#C9D3E0]">
+                                        <span className="text-[10px] uppercase font-bold text-[#4B6A8A]">Location</span>
+                                        <span className="text-[12.5px] font-mono text-[#C9D3E0]">
                                             X:{obj.x} Y:{obj.y}
                                         </span>
                                     </div>
                                     <div className="flex flex-col gap-0.5">
-                                        <span className="text-[7px] uppercase font-bold text-[#4B6A8A]">Assigned Units</span>
-                                        <span className="text-[9px] font-mono text-[#3B82F6]">
+                                        <span className="text-[10px] uppercase font-bold text-[#4B6A8A]">Assigned Units</span>
+                                        <span className="text-[12.5px] font-mono text-[#3B82F6]">
                                             Infantry Squad B
                                         </span>
                                     </div>
                                     <div className="flex flex-col gap-0.5">
-                                        <span className="text-[7px] uppercase font-bold text-[#4B6A8A]">Threat Level</span>
-                                        <span className="text-[9px] font-mono text-[#EF4444]">
+                                        <span className="text-[10px] uppercase font-bold text-[#4B6A8A]">Threat Level</span>
+                                        <span className="text-[12.5px] font-mono text-[#EF4444]">
                                             Medium
                                         </span>
                                     </div>
@@ -520,7 +520,7 @@ export function SidebarAccordion({
                             </div>
                         ))
                     ) : (
-                        <p className="text-[9px] font-mono text-[#374151] italic text-center py-2">
+                        <p className="text-[11px] font-mono text-[#374151] italic text-center py-2">
                             No active objectives identified.
                         </p>
                     )}
@@ -536,7 +536,7 @@ export function SidebarAccordion({
                 onToggle={handleToggle}
                 statusDot={activeScenario ? (loadingAnalysis ? 'amber' : 'green') : 'gray'}
             >
-                <div className="flex flex-col gap-0.5">
+                <div className="flex flex-col gap-1.5">
                     <DataRow
                         icon={AlertTriangle}
                         label="Risk Level"
@@ -571,11 +571,11 @@ export function SidebarAccordion({
                         }}
                     >
                         {loadingAnalysis ? (
-                            <p className="text-[8px] font-mono text-[#A78BFA] leading-relaxed">
+                            <p className="text-[11.5px] font-mono text-[#A78BFA] leading-relaxed">
                                 AI ENGINE ANALYZING battlefield data — Turn {turn}…
                             </p>
                         ) : (
-                            <p className="text-[8px] font-mono text-[#9CA3AF] leading-relaxed">
+                            <p className="text-[11.5px] font-mono text-[#9CA3AF] leading-relaxed">
                                 {analysis
                                     ? 'Operational environment assessed. Strategic recommendations cached.'
                                     : 'No active scenario. Deploy forces to activate threat analysis.'}

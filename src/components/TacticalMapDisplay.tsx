@@ -242,6 +242,7 @@ export function TacticalMapDisplay({
     const [panY, setPanY] = useState(0);
     const [isDragging, setIsDragging] = useState(false);
     const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+    const [isTransitioning, setIsTransitioning] = useState(false);
 
     // Hover & Tooltip State
     const [hoveredUnit, setHoveredUnit] = useState<ScenarioUnit | null>(null);
@@ -258,11 +259,14 @@ export function TacticalMapDisplay({
         setZoom(prev => snapToZoomLevel(prev, 'out'));
     }, []);
 
-    // Reset: ONLY restores the zoom level to exactly 100% (DEFAULT_ZOOM).
-    // It must NOT affect deployed units, enemy positions, markers, objectives, map orientation,
-    // or the current pan (camera) position (panX, panY), thus preserving the view state.
-    const handleZoomReset = useCallback(() => {
-        setZoom(DEFAULT_ZOOM);
+    // Recenter: Smoothly moves the map back to the center of the battlefield grid.
+    // Preserves the current zoom level as per requirements.
+    const handleRecenter = useCallback(() => {
+        setIsTransitioning(true);
+        setPanX(0);
+        setPanY(0);
+        // Reset transitioning state after the smooth motion completes (500ms match transition speed)
+        setTimeout(() => setIsTransitioning(false), 500);
     }, []);
 
     useEffect(() => {
@@ -519,14 +523,14 @@ export function TacticalMapDisplay({
                 >
                     <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: tc.infoColor, boxShadow: `0 0 6px ${tc.infoColor}` }} />
                     <div className="flex flex-col">
-                        <span className="text-[7px] font-mono font-bold uppercase tracking-[0.2em] text-[#4B6A8A] leading-none mb-1">
+                        <span className="text-[10.5px] font-mono font-bold uppercase tracking-[0.2em] text-[#4B6A8A] leading-none mb-1">
                             TERRAIN STATUS
                         </span>
                         <div className="flex items-center gap-2">
-                            <span className="text-[9px] font-mono font-bold text-[#E6EDF3]">
+                            <span className="text-[12.5px] font-mono font-bold text-[#E6EDF3]">
                                 {terrainType}
                             </span>
-                            <span className="text-[7px] font-mono text-[#F59E0B] uppercase">
+                            <span className="text-[10px] font-mono text-[#F59E0B] uppercase">
                                 Operational
                             </span>
                         </div>
@@ -544,14 +548,14 @@ export function TacticalMapDisplay({
                 >
                     <div className="w-1.5 h-1.5 rounded-full" style={{ background: '#3A8DFF', boxShadow: `0 0 6px #3A8DFF` }} />
                     <div className="flex flex-col">
-                        <span className="text-[7px] font-mono font-bold uppercase tracking-[0.2em] text-[#4B6A8A] leading-none mb-1">
+                        <span className="text-[10.5px] font-mono font-bold uppercase tracking-[0.2em] text-[#4B6A8A] leading-none mb-1">
                             WEATHER STATUS
                         </span>
                         <div className="flex items-center gap-2">
-                            <span className="text-[9px] font-mono font-bold text-[#E6EDF3]">
+                            <span className="text-[12.5px] font-mono font-bold text-[#E6EDF3]">
                                 {weather ?? 'Partly Cloudy'} / {getWeatherTemp(weather)}
                             </span>
-                            <span className="text-[7px] font-mono text-[#22C55E] uppercase">
+                            <span className="text-[10px] font-mono text-[#22C55E] uppercase">
                                 Visibility: {getWeatherVisibility(weather)}
                             </span>
                         </div>
@@ -567,7 +571,7 @@ export function TacticalMapDisplay({
                         border: '1px solid rgba(31,111,235,0.25)',
                         backdropFilter: 'blur(4px)',
                     }}>
-                        <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-[#E6EDF3]">
+                        <span className="text-[14px] font-mono font-bold uppercase tracking-widest text-[#E6EDF3]">
                             {scenarioTitle}
                         </span>
                     </div>
@@ -578,7 +582,7 @@ export function TacticalMapDisplay({
             <div className="absolute top-3 right-3 z-20 pointer-events-none">
                 <div className="px-2 py-1 rounded-sm"
                     style={{ background: 'rgba(0,0,0,0.72)', border: `1px solid ${tc.gridLine}` }}>
-                    <span className="text-[8px] font-mono" style={{ color: tc.infoColor }}>
+                    <span className="text-[11.5px] font-mono" style={{ color: tc.infoColor }}>
                         {units.filter(u => u.type === 'FRIENDLY').length}F&nbsp;&nbsp;
                         {units.filter(u => u.type === 'ENEMY').length}H&nbsp;&nbsp;
                         {units.filter(u => u.type === 'OBJECTIVE').length}OBJ
@@ -621,7 +625,7 @@ export function TacticalMapDisplay({
                     className="flex items-center justify-center w-7 h-6"
                     style={{ borderBottom: '1px solid rgba(31,111,235,0.18)' }}
                 >
-                    <span className="text-[7px] font-mono font-bold select-none" style={{ color: '#C9D3E0' }}>
+                    <span className="text-[10px] font-mono font-bold select-none" style={{ color: '#C9D3E0' }}>
                         {getZoomPercentageLabel(zoom)}
                     </span>
                 </div>
@@ -647,10 +651,10 @@ export function TacticalMapDisplay({
                     <ZoomOut className="w-3 h-3" />
                 </button>
 
-                {/* Reset Zoom — resets ONLY the zoom level to 0% (100% scale), preserves pan/units/orientation */}
+                {/* Recenter Map — smoothly moves map to center, preserves zoom level */}
                 <button
-                    onClick={handleZoomReset}
-                    title="Reset Zoom to 0%"
+                    onClick={handleRecenter}
+                    title="Recenter Map"
                     className="flex items-center justify-center w-7 h-7 transition-all"
                     style={{
                         color: '#3A8DFF',
@@ -699,7 +703,10 @@ export function TacticalMapDisplay({
                     </radialGradient>
                 </defs>
 
-                <g transform={`translate(${VW / 2 + panX}, ${VH / 2 + panY}) scale(${zoom}) translate(${-VW / 2}, ${-VH / 2})`}>
+                <g
+                    transform={`translate(${VW / 2 + panX}, ${VH / 2 + panY}) scale(${zoom}) translate(${-VW / 2}, ${-VH / 2})`}
+                    style={{ transition: isTransitioning ? 'transform 0.5s cubic-bezier(0.2, 0, 0, 1)' : 'none' }}
+                >
 
                     {/* Centre radial glow */}
                     <rect x={PL} y={PT} width={mapW} height={mapH} fill="url(#cg)" />
@@ -728,7 +735,7 @@ export function TacticalMapDisplay({
                     {spotLabels.map((s, i) => (
                         <text
                             key={i} x={s.x} y={s.y}
-                            fontSize="6" fontFamily="monospace" textAnchor="middle"
+                            fontSize="9.5" fontFamily="monospace" textAnchor="middle"
                             fill={s.bright ? tc.contourPeak : tc.contour1}
                             opacity="0.70"
                         >
@@ -759,7 +766,7 @@ export function TacticalMapDisplay({
                         i % 2 === 0 ? (
                             <text key={`cl${i}`}
                                 x={PL + (i + 0.5) * cW} y={PT - 9}
-                                fontSize="5.5" fontFamily="monospace" textAnchor="middle"
+                                fontSize="9.5" fontFamily="monospace" textAnchor="middle"
                                 fill={tc.axisText}>
                                 {n}
                             </text>
@@ -769,7 +776,7 @@ export function TacticalMapDisplay({
                         i % 2 === 0 ? (
                             <text key={`rl${i}`}
                                 x={PL - 12} y={PT + (i + 0.5) * cH + 2}
-                                fontSize="5.5" fontFamily="monospace" textAnchor="middle"
+                                fontSize="9.5" fontFamily="monospace" textAnchor="middle"
                                 fill={tc.axisText}>
                                 {ch}
                             </text>

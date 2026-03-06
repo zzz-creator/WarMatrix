@@ -61,7 +61,7 @@ export function AITerminalConsole({ logs, isRunning, title = 'AI ENGINE TERMINAL
             >
                 <div className="flex items-center gap-2">
                     <Terminal className="w-3.5 h-3.5 text-[#1F6FEB]" />
-                    <span className="text-[8px] font-bold uppercase tracking-[0.25em] text-[#1F6FEB]">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#1F6FEB]">
                         {title}
                     </span>
                 </div>
@@ -69,17 +69,17 @@ export function AITerminalConsole({ logs, isRunning, title = 'AI ENGINE TERMINAL
                     {isRunning ? (
                         <div className="flex items-center gap-1.5">
                             <Loader2 className="w-2.5 h-2.5 text-[#F59E0B] animate-spin" />
-                            <span className="text-[7px] font-mono text-[#F59E0B] uppercase tracking-wider">PROCESSING</span>
+                            <span className="text-[9px] font-mono text-[#F59E0B] uppercase tracking-wider">PROCESSING</span>
                         </div>
                     ) : logs.length > 0 ? (
                         <div className="flex items-center gap-1.5">
                             <div className="w-1.5 h-1.5 rounded-full bg-[#22C55E]" />
-                            <span className="text-[7px] font-mono text-[#22C55E] uppercase tracking-wider">READY</span>
+                            <span className="text-[9px] font-mono text-[#22C55E] uppercase tracking-wider">READY</span>
                         </div>
                     ) : (
                         <div className="flex items-center gap-1.5">
                             <div className="w-1.5 h-1.5 rounded-full bg-[#374151]" />
-                            <span className="text-[7px] font-mono text-[#374151] uppercase tracking-wider">IDLE</span>
+                            <span className="text-[9px] font-mono text-[#374151] uppercase tracking-wider">IDLE</span>
                         </div>
                     )}
                     <Cpu className="w-3 h-3 text-[#1F6FEB]/40" />
@@ -93,7 +93,7 @@ export function AITerminalConsole({ logs, isRunning, title = 'AI ENGINE TERMINAL
             >
                 {logs.length === 0 ? (
                     <div className="flex items-center justify-center h-full py-6">
-                        <span className="text-[8px] font-mono text-[#374151] uppercase tracking-widest">
+                        <span className="text-[10px] font-mono text-[#374151] uppercase tracking-widest">
                             Awaiting scenario generation request...
                         </span>
                     </div>
@@ -108,19 +108,19 @@ export function AITerminalConsole({ logs, isRunning, title = 'AI ENGINE TERMINAL
                                     style={{ background: s.bg }}
                                 >
                                     {/* Timestamp */}
-                                    <span className="text-[7px] font-mono text-[#374151] shrink-0 mt-0.5 tabular-nums">
+                                    <span className="text-[8.5px] font-mono text-[#374151] shrink-0 mt-0.5 tabular-nums">
                                         {entry.ts}
                                     </span>
                                     {/* Level tag */}
                                     <span
-                                        className="text-[7px] font-bold shrink-0 mt-0.5 tabular-nums"
-                                        style={{ color: s.color, minWidth: '2.6rem' }}
+                                        className="text-[8.5px] font-bold shrink-0 mt-0.5 tabular-nums"
+                                        style={{ color: s.color, minWidth: '3rem' }}
                                     >
                                         [{entry.level}]
                                     </span>
                                     {/* Message */}
                                     <span
-                                        className="text-[8px] font-mono leading-relaxed break-all"
+                                        className="text-[10px] font-mono leading-relaxed break-all"
                                         style={{ color: s.color === '#94A3B8' ? '#9CA3AF' : s.color }}
                                     >
                                         {entry.msg}
@@ -131,11 +131,11 @@ export function AITerminalConsole({ logs, isRunning, title = 'AI ENGINE TERMINAL
                         {/* Running cursor */}
                         {isRunning && (
                             <div className="flex items-center gap-2 px-1 py-0.5">
-                                <span className="text-[7px] font-mono text-[#374151] tabular-nums">
+                                <span className="text-[8.5px] font-mono text-[#374151] tabular-nums">
                                     {new Date().toLocaleTimeString('en-GB', { hour12: false })}
                                 </span>
-                                <span className="text-[7px] font-bold text-[#F59E0B]">[PROC]</span>
-                                <span className="text-[8px] font-mono text-[#F59E0B] animate-pulse">
+                                <span className="text-[8.5px] font-bold text-[#F59E0B]">[PROC]</span>
+                                <span className="text-[10px] font-mono text-[#F59E0B] animate-pulse">
                                     █
                                 </span>
                             </div>
@@ -150,10 +150,10 @@ export function AITerminalConsole({ logs, isRunning, title = 'AI ENGINE TERMINAL
                 className="flex items-center justify-between px-3 py-1.5 shrink-0"
                 style={{ borderTop: '1px solid rgba(31,111,235,0.12)', background: 'rgba(4,8,18,0.9)' }}
             >
-                <span className="text-[6px] font-mono text-[#2D3748] uppercase tracking-widest">
+                <span className="text-[8px] font-mono text-[#2D3748] uppercase tracking-widest">
                     WARMATRIX ENGINE v4.2 // GENKIT+GEMINI
                 </span>
-                <span className="text-[6px] font-mono text-[#2D3748] tabular-nums">
+                <span className="text-[8px] font-mono text-[#2D3748] tabular-nums">
                     {logs.length} LINES
                 </span>
             </div>

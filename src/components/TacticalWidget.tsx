@@ -18,8 +18,8 @@ export function TacticalWidget({ title, icon: Icon, children, className, headerA
     )}>
       <div className="px-3 py-2 border-b border-[#1F6FEB]/10 bg-[#0F1115]/50 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2">
-          <Icon className="w-3 h-3 text-[#1F6FEB]" />
-          <h3 className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#1F6FEB]">{title}</h3>
+          <Icon className="w-3.5 h-3.5 text-[#1F6FEB]" />
+          <h3 className="text-[10.5px] font-bold uppercase tracking-[0.2em] text-[#1F6FEB]">{title}</h3>
         </div>
         {headerAction}
       </div>
