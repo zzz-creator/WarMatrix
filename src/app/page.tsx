@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Header } from '@/components/Header';
 import { TacticalMapDisplay } from '@/components/TacticalMapDisplay';
 import { ScenarioBuilder } from '@/components/ScenarioBuilder';
@@ -251,6 +252,7 @@ const WIDGET_SOURCE_STYLE: Record<MessageSource, { label: string; color: string;
 // ─── Page ──────────────────────────────────────────────────────────────────────
 
 export default function WarMatrixPage() {
+  const router = useRouter();
   const { toast } = useToast();
   const [turn, setTurn] = useState(1);
   const [status, setStatus] = useState<'ACTIVE' | 'AWAITING COMMAND' | 'PROCESSING'>('ACTIVE');
@@ -629,6 +631,11 @@ export default function WarMatrixPage() {
     }
   };
 
+  const handleEndSimulation = () => {
+    // Navigate to Final Mission Report
+    router.push('/final-report');
+  };
+
   const visibleUnits = activeScenario ? units : [];
 
   const terrainType = activeScenario?.terrainType ?? 'Highland';
@@ -907,6 +914,7 @@ export default function WarMatrixPage() {
                 mapPeaks={activeScenario.mapPeaks}
                 movements={movementEvents}
                 combatEvents={combatEvents}
+                onEndSimulation={handleEndSimulation}
               />
             ) : centerScenarioMode !== 'default' ? (
               <ScenarioBuilder

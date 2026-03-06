@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useMemo, useState, useRef, useEffect, useCallback } from 'react';
-import { RotateCcw, ZoomIn, ZoomOut } from 'lucide-react';
+import { RotateCcw, ZoomIn, ZoomOut, Square } from 'lucide-react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -38,6 +38,7 @@ interface TacticalMapDisplayProps {
     mapPeaks?: { cx: number; cy: number; h: number; r2: number }[];
     movements?: UnitMovement[];
     combatEvents?: CombatEvent[];
+    onEndSimulation?: () => void;
 }
 
 // ─── Terrain palettes ─────────────────────────────────────────────────────────
@@ -206,6 +207,7 @@ export function TacticalMapDisplay({
     mapPeaks,
     movements = [],
     combatEvents = [],
+    onEndSimulation,
 }: TacticalMapDisplayProps) {
     const tc: TC = TERRAIN_CONFIG[terrainType as TerrainKey] ?? TERRAIN_CONFIG.Highland;
 
@@ -259,14 +261,14 @@ export function TacticalMapDisplay({
         setZoom(prev => snapToZoomLevel(prev, 'out'));
     }, []);
 
-    // Recenter: Smoothly moves the map back to the center of the battlefield grid.
+    // Recenter Map: Smoothly moves the map back to the tactical grid center.
     // Preserves the current zoom level as per requirements.
     const handleRecenter = useCallback(() => {
         setIsTransitioning(true);
         setPanX(0);
         setPanY(0);
-        // Reset transitioning state after the smooth motion completes (500ms match transition speed)
-        setTimeout(() => setIsTransitioning(false), 500);
+        // Reset transitioning state after the smooth motion completes (300ms)
+        setTimeout(() => setIsTransitioning(false), 300);
     }, []);
 
     useEffect(() => {
@@ -313,6 +315,10 @@ export function TacticalMapDisplay({
     const ROWS = 28;
     const cW = mapW / COLS;
     const cH = mapH / ROWS;
+
+    // Tactical Grid Center
+    const gridCenterX = PL + mapW / 2;
+    const gridCenterY = PT + mapH / 2;
 
     // Heightmap — recalculate only when terrain or scenario title changes
     const heightmap = useMemo(
@@ -563,10 +569,10 @@ export function TacticalMapDisplay({
                 </div>
             </div>
 
-            {/* ── Scenario title ── */}
+            {/* ── Scenario title & End Simulation ── */}
             {scenarioTitle && (
-                <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
-                    <div className="px-3 py-1 rounded-sm" style={{
+                <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
+                    <div className="px-3 py-1 rounded-sm pointer-events-none" style={{
                         background: 'rgba(0,0,0,0.80)',
                         border: '1px solid rgba(31,111,235,0.25)',
                         backdropFilter: 'blur(4px)',
@@ -575,6 +581,23 @@ export function TacticalMapDisplay({
                             {scenarioTitle}
                         </span>
                     </div>
+
+                    {onEndSimulation && (
+                        <button
+                            onClick={onEndSimulation}
+                            className="px-3 py-[5px] rounded-sm flex items-center gap-2 transition-all group"
+                            style={{
+                                background: 'rgba(4,10,22,0.80)',
+                                border: '1px solid rgba(31,111,235,0.28)',
+                                backdropFilter: 'blur(6px)',
+                            }}
+                        >
+                            <Square className="w-2.5 h-2.5 text-[#3A8DFF] fill-[#3A8DFF]/10 transition-all group-hover:scale-110 group-hover:fill-[#3A8DFF]/30" />
+                            <span className="text-[10px] font-mono font-bold uppercase tracking-[0.15em] text-[#3A8DFF] group-hover:text-[#5CABFF] group-hover:drop-shadow-[0_0_5px_rgba(58,141,255,0.45)]">
+                                END SIMULATION
+                            </span>
+                        </button>
+                    )}
                 </div>
             )}
 
@@ -704,8 +727,8 @@ export function TacticalMapDisplay({
                 </defs>
 
                 <g
-                    transform={`translate(${VW / 2 + panX}, ${VH / 2 + panY}) scale(${zoom}) translate(${-VW / 2}, ${-VH / 2})`}
-                    style={{ transition: isTransitioning ? 'transform 0.5s cubic-bezier(0.2, 0, 0, 1)' : 'none' }}
+                    transform={`translate(${VW / 2 + panX}, ${VH / 2 + panY}) scale(${zoom}) translate(${-gridCenterX}, ${-gridCenterY})`}
+                    style={{ transition: isTransitioning ? 'transform 0.3s cubic-bezier(0.2, 0, 0, 1)' : 'none' }}
                 >
 
                     {/* Centre radial glow */}
