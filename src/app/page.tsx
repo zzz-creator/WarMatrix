@@ -337,7 +337,7 @@ export default function WarMatrixPage() {
 
       <main className="flex-1 p-4 flex gap-4 overflow-hidden">
         {/* LEFT ZONE: Intel Widgets */}
-        <div className="w-64 flex flex-col gap-4 shrink-0 overflow-y-auto pr-1 custom-scrollbar">
+        <div className="w-64 flex flex-col gap-4 shrink-0 h-full overflow-hidden pr-1">
           {/* Sidebar Accordion with all 5 modules */}
           <SidebarAccordion
             activeScenario={activeScenario}
@@ -360,101 +360,56 @@ export default function WarMatrixPage() {
           </TacticalWidget>
 
 
-          <TacticalWidget
-            title="AI Strategic Analysis"
-            icon={BrainCircuit}
-            headerAction={loadingAnalysis && <div className="w-2 h-2 rounded-full bg-[#F59E0B] animate-ping" />}
-          >
-            <div className="flex flex-col gap-3">
-              <div className="flex justify-between items-center">
-                <span className="text-[10px] text-[#9CA3AF] uppercase font-bold">Status</span>
-                <span className={`text-[10px] font-bold ${!activeScenario ? 'text-[#4B5563]' :
-                  loadingAnalysis ? 'text-[#F59E0B]' : 'text-[#22C55E]'
-                  }`}>
-                  {!activeScenario ? 'OFFLINE' : loadingAnalysis ? 'ANALYZING...' : 'READY'}
-                </span>
-              </div>
-              <div className="bg-[#0D223A]/30 border border-[#1F6FEB]/10 p-2 rounded-sm">
-                <span className="text-[9px] text-[#9CA3AF] uppercase font-bold mb-1 block">Risk Signals</span>
-                <span className="text-sm font-headline font-bold text-[#EF4444]">
-                  {analysis ? 'LOW-MODERATE' : '---'}
-                </span>
-              </div>
-              <p className="text-[10px] text-[#9CA3AF] italic leading-relaxed">
-                {!activeScenario
-                  ? 'No scenario loaded. Deploy forces to activate strategic analysis.'
-                  : analysis
-                    ? 'Operational environment assessed. Strategic recommendations cached.'
-                    : 'Awaiting battlefield snapshot for updated briefing.'}
-              </p>
-            </div>
-          </TacticalWidget>
-
-          <TacticalWidget title="Operations Feed" icon={ShieldAlert}>
-            <div className="flex flex-col gap-2">
-              <div className="flex justify-between items-center text-[9px] text-[#9CA3AF] uppercase font-bold">
-                <span>Latest Status</span>
-                <span className={activeScenario ? 'text-[#22C55E]' : 'text-[#4B5563]'}>
-                  {activeScenario ? 'TRANSMITTING' : 'OFFLINE'}
-                </span>
-              </div>
-              <div className="p-2 bg-[#151A20] border-l border-[#1F6FEB] rounded-sm">
-                <p className="text-[10px] font-mono text-[#E6EDF3] leading-tight">
-                  {lastResult
-                    ? `EXEC: ${lastResult.command}`
-                    : activeScenario
-                      ? `SCENARIO: ${activeScenario.title}`
-                      : 'AWAITING_SCENARIO_LOAD'}
-                </p>
-              </div>
-              <div className="flex items-center gap-2 mt-auto">
-                <Activity className={`w-3 h-3 ${activeScenario ? 'text-[#1F6FEB] animate-pulse' : 'text-[#374151]'}`} />
-                <span className="text-[8px] font-mono text-[#4B5563]">
-                  {activeScenario
-                    ? 'QUEUE_EMPTY // READY_FOR_STATE_CHANGE'
-                    : 'STANDBY // AWAITING_INITIALIZATION'}
-                </span>
-              </div>
-            </div>
-          </TacticalWidget>
-
           {/* Active Scenario — clickable briefing panel */}
-          {activeScenario && (
-            <button
-              onClick={() => setIsBriefingModalOpen(true)}
-              className="w-full text-left group"
-              style={{
-                background: 'rgba(8,14,28,0.85)',
-                border: '1px solid rgba(31,111,235,0.22)',
-                borderRadius: '2px',
-                padding: '10px 12px',
-                transition: 'border-color 0.2s, box-shadow 0.2s',
-              }}
-              onMouseEnter={(e) => {
-                const el = e.currentTarget as HTMLButtonElement;
-                el.style.borderColor = 'rgba(31,111,235,0.55)';
-                el.style.boxShadow = '0 0 14px rgba(31,111,235,0.08)';
-              }}
-              onMouseLeave={(e) => {
-                const el = e.currentTarget as HTMLButtonElement;
-                el.style.borderColor = 'rgba(31,111,235,0.22)';
-                el.style.boxShadow = 'none';
-              }}
-            >
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-[#22C55E] animate-pulse" style={{ boxShadow: '0 0 5px #22C55E80' }} />
-                <span className="text-[8px] font-bold uppercase tracking-[0.2em] text-[#3A8DFF]">Active Scenario</span>
-                <span className="ml-auto text-[7px] font-mono text-[#1F6FEB]/50 group-hover:text-[#3A8DFF] transition-colors uppercase tracking-wider">View Briefing ›</span>
+          <div className="flex-1 flex flex-col min-h-0">
+            {activeScenario ? (
+              <button
+                onClick={() => setIsBriefingModalOpen(true)}
+                className="w-full text-left group flex-1 flex flex-col"
+                style={{
+                  background: 'rgba(8,14,28,0.85)',
+                  border: '1px solid rgba(31,111,235,0.22)',
+                  borderRadius: '2px',
+                  padding: '10px 12px',
+                  transition: 'border-color 0.2s, box-shadow 0.2s',
+                  minHeight: '120px',
+                }}
+                onMouseEnter={(e) => {
+                  const el = e.currentTarget as HTMLButtonElement;
+                  el.style.borderColor = 'rgba(31,111,235,0.55)';
+                  el.style.boxShadow = '0 0 14px rgba(31,111,235,0.08)';
+                }}
+                onMouseLeave={(e) => {
+                  const el = e.currentTarget as HTMLButtonElement;
+                  el.style.borderColor = 'rgba(31,111,235,0.22)';
+                  el.style.boxShadow = 'none';
+                }}
+              >
+                <div className="flex items-center gap-2 mb-2 shrink-0">
+                  <div className="w-1.5 h-1.5 rounded-full bg-[#22C55E] animate-pulse" style={{ boxShadow: '0 0 5px #22C55E80' }} />
+                  <span className="text-[8px] font-bold uppercase tracking-[0.2em] text-[#3A8DFF]">Active Scenario</span>
+                  <span className="ml-auto text-[7px] font-mono text-[#1F6FEB]/50 group-hover:text-[#3A8DFF] transition-colors uppercase tracking-wider">View Briefing ›</span>
+                </div>
+                <span className="text-[10px] font-bold text-[#E6EDF3] leading-tight block mb-1 truncate shrink-0">{activeScenario.title}</span>
+                <p className="text-[8px] font-mono text-[#6B7280] leading-snug line-clamp-4 flex-1">{activeScenario.briefing}</p>
+                <div className="flex items-center gap-2 mt-auto pt-2 shrink-0">
+                  <span className="text-[7px] font-mono text-[#8B5CF6] uppercase">{activeScenario.terrainType}</span>
+                  <span className="text-[7px] font-mono text-[#4B5563]">·</span>
+                  <span className="text-[7px] font-mono text-[#4B5563]">{units.length} units</span>
+                </div>
+              </button>
+            ) : (
+              <div
+                className="w-full flex-1 flex flex-col items-center justify-center p-4 text-center border border-[#1F6FEB]/10 rounded-sm bg-[#080E1C]/40"
+              >
+                <div className="w-8 h-8 rounded-full border border-[#1F6FEB]/20 flex items-center justify-center mb-3">
+                  <div className="w-1.5 h-1.5 rounded-full bg-[#374151]" />
+                </div>
+                <span className="text-[8px] font-bold uppercase tracking-[0.2em] text-[#4B5563] mb-1">No Active Scenario</span>
+                <p className="text-[7px] font-mono text-[#374151] leading-tight">Awaiting initial tactical deployment</p>
               </div>
-              <span className="text-[10px] font-bold text-[#E6EDF3] leading-tight block mb-1 truncate">{activeScenario.title}</span>
-              <p className="text-[8px] font-mono text-[#6B7280] leading-snug line-clamp-2">{activeScenario.briefing}</p>
-              <div className="flex items-center gap-2 mt-2">
-                <span className="text-[7px] font-mono text-[#8B5CF6] uppercase">{activeScenario.terrainType}</span>
-                <span className="text-[7px] font-mono text-[#4B5563]">·</span>
-                <span className="text-[7px] font-mono text-[#4B5563]">{units.length} units</span>
-              </div>
-            </button>
-          )}
+            )}
+          </div>
         </div>
 
         {/* ── MISSION BRIEFING MODAL ── */}

@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useMemo, useState, useRef, useEffect } from 'react';
+import React, { useMemo, useState, useRef, useEffect, useCallback } from 'react';
+import { RotateCcw, ZoomIn, ZoomOut } from 'lucide-react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -191,8 +192,20 @@ export function TacticalMapDisplay({
 }: TacticalMapDisplayProps) {
     const tc: TC = TERRAIN_CONFIG[terrainType as TerrainKey] ?? TERRAIN_CONFIG.Highland;
 
+    // ── Stepped zoom levels: 70% → 120% in 10% increments ──────────────────────
+    const ZOOM_LEVELS = [0.7, 0.8, 0.9, 1.0, 1.1, 1.2] as const;
+    const DEFAULT_ZOOM = 1.0;
+    const ZOOM_STEP = 0.1;
+
+    const snapToZoomLevel = (raw: number): number => {
+        // Clamp to valid range
+        const clamped = Math.max(ZOOM_LEVELS[0], Math.min(ZOOM_LEVELS[ZOOM_LEVELS.length - 1], raw));
+        // Snap to nearest 10% step
+        return Math.round(clamped * 10) / 10;
+    };
+
     // Pan & Zoom State
-    const [zoom, setZoom] = useState(1);
+    const [zoom, setZoom] = useState<number>(DEFAULT_ZOOM);
     const [panX, setPanX] = useState(0);
     const [panY, setPanY] = useState(0);
     const [isDragging, setIsDragging] = useState(false);
@@ -204,16 +217,29 @@ export function TacticalMapDisplay({
 
     const svgRef = useRef<SVGSVGElement>(null);
 
+    // Zoom helpers
+    const handleZoomIn = useCallback(() => {
+        setZoom(prev => snapToZoomLevel(prev + ZOOM_STEP));
+    }, []);
+
+    const handleZoomOut = useCallback(() => {
+        setZoom(prev => snapToZoomLevel(prev - ZOOM_STEP));
+    }, []);
+
+    // Reset: ONLY restores the zoom level to exactly 100% (DEFAULT_ZOOM).
+    // It must NOT affect deployed units, enemy positions, markers, objectives, map orientation,
+    // or the current pan (camera) position (panX, panY), thus preserving the view state.
+    const handleZoomReset = useCallback(() => {
+        setZoom(DEFAULT_ZOOM);
+    }, []);
+
     useEffect(() => {
         const svg = svgRef.current;
         if (!svg) return;
 
         const handleNativeWheel = (e: WheelEvent) => {
-            e.preventDefault(); // Prevent browser from scrolling/zooming the whole page
-            const scaleBy = 1.08;
-            setZoom(prev => {
-                return e.deltaY < 0 ? Math.min(prev * scaleBy, 8) : Math.max(prev / scaleBy, 0.4);
-            });
+            e.preventDefault();
+            setZoom(prev => snapToZoomLevel(e.deltaY < 0 ? prev + ZOOM_STEP : prev - ZOOM_STEP));
         };
 
         svg.addEventListener('wheel', handleNativeWheel, { passive: false });
@@ -473,6 +499,88 @@ export function TacticalMapDisplay({
                         {units.filter(u => u.type === 'OBJECTIVE').length}OBJ
                     </span>
                 </div>
+            </div>
+
+            {/* ── Zoom Controls ── */}
+            <div
+                className="absolute top-14 right-3 z-30 flex flex-col items-center gap-0 rounded-sm overflow-hidden"
+                style={{
+                    background: 'rgba(4,10,22,0.85)',
+                    border: '1px solid rgba(31,111,235,0.28)',
+                    backdropFilter: 'blur(6px)',
+                }}
+            >
+                {/* Zoom In */}
+                <button
+                    onClick={handleZoomIn}
+                    disabled={zoom >= 1.2}
+                    title="Zoom In"
+                    className="flex items-center justify-center w-7 h-7 transition-all"
+                    style={{
+                        color: zoom >= 1.2 ? 'rgba(31,111,235,0.25)' : '#3A8DFF',
+                        borderBottom: '1px solid rgba(31,111,235,0.18)',
+                        cursor: zoom >= 1.2 ? 'default' : 'pointer',
+                    }}
+                    onMouseEnter={(e) => {
+                        if (zoom < 1.2) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(31,111,235,0.15)';
+                    }}
+                    onMouseLeave={(e) => {
+                        (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
+                    }}
+                >
+                    <ZoomIn className="w-3 h-3" />
+                </button>
+
+                {/* Zoom % Display */}
+                <div
+                    className="flex items-center justify-center w-7 h-6"
+                    style={{ borderBottom: '1px solid rgba(31,111,235,0.18)' }}
+                >
+                    <span className="text-[7px] font-mono font-bold select-none" style={{ color: '#C9D3E0' }}>
+                        {Math.round(zoom * 100)}%
+                    </span>
+                </div>
+
+                {/* Zoom Out */}
+                <button
+                    onClick={handleZoomOut}
+                    disabled={zoom <= 0.7}
+                    title="Zoom Out"
+                    className="flex items-center justify-center w-7 h-7 transition-all"
+                    style={{
+                        color: zoom <= 0.7 ? 'rgba(31,111,235,0.25)' : '#3A8DFF',
+                        borderBottom: '1px solid rgba(31,111,235,0.18)',
+                        cursor: zoom <= 0.7 ? 'default' : 'pointer',
+                    }}
+                    onMouseEnter={(e) => {
+                        if (zoom > 0.7) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(31,111,235,0.15)';
+                    }}
+                    onMouseLeave={(e) => {
+                        (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
+                    }}
+                >
+                    <ZoomOut className="w-3 h-3" />
+                </button>
+
+                {/* Reset Zoom — resets ONLY the zoom level to 100%, preserves pan/units/orientation */}
+                <button
+                    onClick={handleZoomReset}
+                    disabled={zoom === DEFAULT_ZOOM}
+                    title="Reset Zoom to 100%"
+                    className="flex items-center justify-center w-7 h-7 transition-all"
+                    style={{
+                        color: zoom === DEFAULT_ZOOM ? 'rgba(31,111,235,0.25)' : '#3A8DFF',
+                        cursor: zoom === DEFAULT_ZOOM ? 'default' : 'pointer',
+                    }}
+                    onMouseEnter={(e) => {
+                        if (zoom !== DEFAULT_ZOOM) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(31,111,235,0.15)';
+                    }}
+                    onMouseLeave={(e) => {
+                        (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
+                    }}
+                >
+                    <RotateCcw className="w-3 h-3" />
+                </button>
             </div>
 
             {/* ── SVG map ── */}

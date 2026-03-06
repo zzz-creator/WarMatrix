@@ -55,6 +55,7 @@ interface AccordionPanelProps {
     onToggle: (id: string) => void;
     children: React.ReactNode;
     statusDot?: 'green' | 'red' | 'amber' | 'gray';
+    overrideIconColor?: string;
 }
 
 function AccordionPanel({
@@ -65,6 +66,7 @@ function AccordionPanel({
     onToggle,
     children,
     statusDot,
+    overrideIconColor,
 }: AccordionPanelProps) {
     const isOpen = activeId === id;
     const contentRef = useRef<HTMLDivElement>(null);
@@ -114,7 +116,7 @@ function AccordionPanel({
 
                 <Icon
                     className="w-3 h-3 shrink-0"
-                    style={{ color: isOpen ? '#3A8DFF' : '#4B6A8A' }}
+                    style={{ color: overrideIconColor || (isOpen ? '#3A8DFF' : '#4B6A8A') }}
                 />
 
                 <span
@@ -374,6 +376,7 @@ export function SidebarAccordion({
                 activeId={activeId}
                 onToggle={handleToggle}
                 statusDot={activeScenario ? (enemy > 5 ? 'red' : 'amber') : 'gray'}
+                overrideIconColor="#F59E0B"
             >
                 <div className="flex flex-col gap-0.5">
                     <DataRow
@@ -446,12 +449,6 @@ export function SidebarAccordion({
                         value={activeScenario ? `${Math.max(1, Math.round(friendly * 0.15))} SQDS` : '—'}
                         valueColor={activeScenario ? '#9CA3AF' : '#4B5563'}
                     />
-                    <DataRow
-                        icon={Radio}
-                        label="Objectives Held"
-                        value={activeScenario ? `${objective}` : '—'}
-                        valueColor={activeScenario ? '#F59E0B' : '#4B5563'}
-                    />
                 </div>
                 {activeScenario && (
                     <div className="mt-2.5 flex items-center justify-between">
@@ -465,7 +462,72 @@ export function SidebarAccordion({
                 )}
             </AccordionPanel>
 
-            {/* ── 4. Threat Assessment Engine ── */}
+            {/* ── 4. Objectives ── */}
+            <AccordionPanel
+                id="objectives"
+                title="Objectives"
+                icon={Crosshair}
+                activeId={activeId}
+                onToggle={handleToggle}
+                statusDot={activeScenario ? (objective > 0 ? 'amber' : 'gray') : 'gray'}
+            >
+                <div className="flex flex-col gap-3">
+                    {activeScenario && activeScenario.units.filter(u => u.type === 'OBJECTIVE').length > 0 ? (
+                        activeScenario.units.filter(u => u.type === 'OBJECTIVE').map((obj, i) => (
+                            <div
+                                key={obj.id || i}
+                                className="p-2.5 rounded-sm flex flex-col gap-2"
+                                style={{
+                                    background: 'rgba(31,111,235,0.04)',
+                                    border: '1px solid rgba(31,111,235,0.12)',
+                                }}
+                            >
+                                <div className="flex items-center justify-between border-b border-[#1F6FEB]/10 pb-1.5 mb-0.5">
+                                    <span className="text-[10px] font-bold text-[#E6EDF3] uppercase tracking-wide">
+                                        {obj.label}
+                                    </span>
+                                    <span className="text-[8px] font-mono text-[#F59E0B] uppercase font-bold">
+                                        Active
+                                    </span>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-y-1.5 gap-x-2">
+                                    <div className="flex flex-col gap-0.5">
+                                        <span className="text-[7px] uppercase font-bold text-[#4B6A8A]">Type</span>
+                                        <span className="text-[9px] font-mono text-[#C9D3E0]">
+                                            {obj.assetClass === 'Infrastructure' ? 'Strategic' : obj.assetClass === 'Objective' ? 'Tactical' : 'Recon'}
+                                        </span>
+                                    </div>
+                                    <div className="flex flex-col gap-0.5">
+                                        <span className="text-[7px] uppercase font-bold text-[#4B6A8A]">Location</span>
+                                        <span className="text-[9px] font-mono text-[#C9D3E0]">
+                                            X:{obj.x} Y:{obj.y}
+                                        </span>
+                                    </div>
+                                    <div className="flex flex-col gap-0.5">
+                                        <span className="text-[7px] uppercase font-bold text-[#4B6A8A]">Assigned Units</span>
+                                        <span className="text-[9px] font-mono text-[#3B82F6]">
+                                            Infantry Squad B
+                                        </span>
+                                    </div>
+                                    <div className="flex flex-col gap-0.5">
+                                        <span className="text-[7px] uppercase font-bold text-[#4B6A8A]">Threat Level</span>
+                                        <span className="text-[9px] font-mono text-[#EF4444]">
+                                            Medium
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        ))
+                    ) : (
+                        <p className="text-[9px] font-mono text-[#374151] italic text-center py-2">
+                            No active objectives identified.
+                        </p>
+                    )}
+                </div>
+            </AccordionPanel>
+
+            {/* ── 5. Threat Assessment Engine ── */}
             <AccordionPanel
                 id="threat"
                 title="Threat Assessment Engine"
