@@ -1,9 +1,6 @@
-'use client';
-
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 
 export function TerrainIntelligencePanel() {
-    const scanRef = useRef<HTMLDivElement>(null);
 
     return (
         <div className="absolute inset-0 z-10 flex items-center justify-center p-3 pointer-events-none">
@@ -17,30 +14,6 @@ export function TerrainIntelligencePanel() {
                         '0 0 24px rgba(31,111,235,0.15), 0 0 60px rgba(0,180,255,0.06), inset 0 0 60px rgba(0,60,120,0.08)',
                 }}
             >
-                {/* Inner top gradient shimmer */}
-                <div
-                    className="absolute inset-x-0 top-0 h-px"
-                    style={{ background: 'linear-gradient(90deg, transparent, rgba(0,200,255,0.5), transparent)' }}
-                />
-
-                {/* Soft blue inner glow */}
-                <div
-                    className="absolute inset-0 pointer-events-none"
-                    style={{
-                        background:
-                            'radial-gradient(ellipse 60% 50% at 50% 55%, rgba(0,80,200,0.10) 0%, transparent 80%)',
-                    }}
-                />
-
-                {/* Scanning shimmer overlay */}
-                <div
-                    className="absolute inset-x-0 pointer-events-none terrain-scan-line"
-                    style={{
-                        height: '2px',
-                        background: 'linear-gradient(90deg, transparent, rgba(0,200,255,0.18), rgba(0,200,255,0.4), rgba(0,200,255,0.18), transparent)',
-                        boxShadow: '0 0 12px rgba(0,200,255,0.25)',
-                    }}
-                />
 
                 {/* PANEL HEADER */}
                 <div className="absolute top-3 left-4 right-4 flex items-center justify-between z-20">
@@ -436,18 +409,6 @@ export function TerrainIntelligencePanel() {
                 <div className="absolute bottom-0 right-0 w-4 h-4 border-b border-r border-[#1F6FEB]/50 rounded-br-lg" />
             </div>
 
-            <style jsx>{`
-        @keyframes terrain-scan {
-          0% { top: 5%; opacity: 0; }
-          5% { opacity: 1; }
-          95% { opacity: 1; }
-          100% { top: 95%; opacity: 0; }
-        }
-        .terrain-scan-line {
-          animation: terrain-scan 6s linear infinite;
-          position: absolute;
-        }
-      `}</style>
         </div>
     );
 }

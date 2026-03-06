@@ -19,12 +19,10 @@ export function TacticalMap({ units }: TacticalMapProps) {
   const gridCols = 12;
 
   return (
-    <div className="flex-1 relative bg-[#0A0A0A] border border-[#1F6FEB]/20 overflow-hidden panel-scanline">
-      {/* Central Blue Glow */}
-      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_50%_50%,rgba(31,111,235,0.1)_0%,transparent_70%)]" />
+    <div className="flex-1 relative bg-[#0A0A0A] border border-[#1F6FEB]/20 overflow-hidden">
 
       {/* Grid Overlay */}
-      <div 
+      <div
         className="absolute inset-0 pointer-events-none"
         style={{
           backgroundImage: `
@@ -50,12 +48,12 @@ export function TacticalMap({ units }: TacticalMapProps) {
             <polygon points="0 0, 10 3.5, 0 7" fill="#1F6FEB" fillOpacity="0.4" />
           </marker>
         </defs>
-        <path 
-          d="M 200 150 L 400 300 L 600 250" 
-          stroke="#1F6FEB" 
-          strokeWidth="1" 
-          strokeDasharray="4 4" 
-          fill="none" 
+        <path
+          d="M 200 150 L 400 300 L 600 250"
+          stroke="#1F6FEB"
+          strokeWidth="1"
+          strokeDasharray="4 4"
+          fill="none"
           strokeOpacity="0.4"
           markerEnd="url(#arrowhead)"
         />
@@ -63,7 +61,7 @@ export function TacticalMap({ units }: TacticalMapProps) {
 
       {/* Units */}
       {units.map((unit) => (
-        <div 
+        <div
           key={unit.id}
           className="absolute transition-all duration-1000 ease-in-out group cursor-help"
           style={{
@@ -85,7 +83,7 @@ export function TacticalMap({ units }: TacticalMapProps) {
                 <div className="w-1.5 h-1.5 bg-[#F59E0B] rounded-full" />
               </div>
             )}
-            
+
             {/* Tooltip Label */}
             <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-[#0F1115]/95 border border-[#1F6FEB]/30 px-2 py-1 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none shadow-lg">
               <span className="text-[10px] font-mono text-[#E6EDF3] flex items-center gap-1.5 uppercase tracking-wider">

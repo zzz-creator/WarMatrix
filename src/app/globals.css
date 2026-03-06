@@ -52,24 +52,6 @@
   box-shadow: 0 0 15px rgba(31, 111, 235, 0.15);
 }
 
-.panel-scanline {
-  position: relative;
-  overflow: hidden;
-}
-
-.panel-scanline::after {
-  content: " ";
-  display: block;
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
-  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.05) 50%), linear-gradient(90deg, rgba(31, 111, 235, 0.01), rgba(0, 255, 0, 0.005), rgba(0, 0, 255, 0.01));
-  z-index: 2;
-  background-size: 100% 2px, 3px 100%;
-  pointer-events: none;
-}
 
 @keyframes pulse-slow {
   0%, 100% { opacity: 1; }
