@@ -69,6 +69,8 @@ interface ScenarioBuilderProps {
   onClose: () => void;
   onScenarioGenerated?: (scenario: GenerateScenarioOutput, terrainType: TerrainType) => void;
   onBriefingGenerated?: (title: string, briefing: string) => void;
+  initialMode?: EntryMode;
+  isInline?: boolean;
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -137,10 +139,26 @@ type AIGenStatus = 'idle' | 'rolling' | 'generating' | 'done' | 'error';
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export function ScenarioBuilder({ units, onUpdateUnits, isOpen, onClose, onScenarioGenerated, onBriefingGenerated }: ScenarioBuilderProps) {
+export function ScenarioBuilder({ units, onUpdateUnits, isOpen, onClose, onScenarioGenerated, onBriefingGenerated, initialMode = null, isInline = false }: ScenarioBuilderProps) {
 
   // ── Entry mode gate ──────────────────────────────────────────────────────────
-  const [entryMode, setEntryMode] = useState<EntryMode>(null);
+  const [entryMode, setEntryMode] = useState<EntryMode>(initialMode);
+
+  // ── Reset state on open ──────────────────────────────────────────────────────
+  React.useEffect(() => {
+    if (isOpen) {
+      setEntryMode(initialMode);
+      setAiStatus('idle');
+      setAiResult(null);
+      setAiError(null);
+      setAiParams(null);
+      setRollStep(0);
+      setTermLogs([]);
+      setNewLabel('');
+      setGridX('');
+      setGridY('');
+    }
+  }, [isOpen, initialMode]);
 
   // ── Manual deployment state ──────────────────────────────────────────────────
   const [newLabel, setNewLabel] = useState('');
@@ -332,8 +350,8 @@ export function ScenarioBuilder({ units, onUpdateUnits, isOpen, onClose, onScena
     ];
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 backdrop-blur-sm p-4">
-      <div className="w-full max-w-3xl bg-[#0F1115] border border-[#1F6FEB]/30 rounded-sm shadow-2xl flex flex-col max-h-[90vh]">
+    <div className={isInline ? "relative h-full w-full flex flex-col" : "fixed inset-0 z-[100] flex items-center justify-center bg-black/85 backdrop-blur-sm p-4"}>
+      <div className={isInline ? "flex-1 bg-[#0F1115] border-0 flex flex-col min-h-0" : "w-full max-w-3xl bg-[#0F1115] border border-[#1F6FEB]/30 rounded-sm shadow-2xl flex flex-col max-h-[90vh]"}>
 
         {/* ── HEADER ── */}
         <div className="p-4 border-b border-[#1F6FEB]/20 flex items-center justify-between bg-[#151A20] shrink-0">

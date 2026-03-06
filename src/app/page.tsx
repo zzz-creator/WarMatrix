@@ -71,6 +71,7 @@ export default function WarMatrixPage() {
   const [analysis, setAnalysis] = useState<ReceiveStrategicAnalysisOutput | null>(null);
   const [role, setRole] = useState<'BLUE_TEAM' | 'RED_TEAM'>('BLUE_TEAM');
   const [isBuilderOpen, setIsBuilderOpen] = useState(false);
+  const [builderInitialMode, setBuilderInitialMode] = useState<any>(null);
   const [isCommsConsoleOpen, setIsCommsConsoleOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [lastResult, setLastResult] = useState<{
@@ -290,9 +291,10 @@ export default function WarMatrixPage() {
       <Header
         turn={turn}
         status={status}
-        role={role}
-        onRoleSwitch={setRole}
-        onOpenBuilder={() => setIsBuilderOpen(true)}
+        onOpenBuilder={() => {
+          setBuilderInitialMode(null);
+          setIsBuilderOpen(true);
+        }}
       />
 
       <main className="flex-1 p-4 flex gap-4 overflow-hidden">
@@ -466,6 +468,16 @@ export default function WarMatrixPage() {
                   </div>
                 </div>
               </>
+            ) : isBuilderOpen ? (
+              <ScenarioBuilder
+                units={units as any}
+                onUpdateUnits={(u) => setUnits(u as Unit[])}
+                isOpen={isBuilderOpen}
+                onClose={() => setIsBuilderOpen(false)}
+                onScenarioGenerated={handleScenarioGenerated}
+                initialMode={builderInitialMode}
+                isInline={true}
+              />
             ) : (
               /* ── NO SIMULATION STATE ── */
               <div
@@ -518,7 +530,10 @@ export default function WarMatrixPage() {
                   {/* Action buttons */}
                   <div className="flex items-center gap-3">
                     <button
-                      onClick={() => setIsBuilderOpen(true)}
+                      onClick={() => {
+                        setBuilderInitialMode('AI');
+                        setIsBuilderOpen(true);
+                      }}
                       className="flex items-center gap-2 px-5 py-2.5 rounded-sm border text-[9px] font-bold uppercase tracking-widest transition-all"
                       style={{
                         background: 'rgba(139,92,246,0.10)',
@@ -538,7 +553,10 @@ export default function WarMatrixPage() {
                       Random Scenario
                     </button>
                     <button
-                      onClick={() => setIsBuilderOpen(true)}
+                      onClick={() => {
+                        setBuilderInitialMode(null);
+                        setIsBuilderOpen(true);
+                      }}
                       className="flex items-center gap-2 px-5 py-2.5 rounded-sm border text-[9px] font-bold uppercase tracking-widest transition-all"
                       style={{
                         background: 'rgba(31,111,235,0.08)',
@@ -663,7 +681,6 @@ export default function WarMatrixPage() {
         onScenarioGenerated={handleScenarioGenerated}
         onBriefingGenerated={handleBriefingGenerated}
       />
-
       <SecureCommsConsole
         messages={chatMessages}
         onMessagesChange={setChatMessages}

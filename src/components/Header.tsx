@@ -18,8 +18,9 @@ interface HeaderProps {
 
 export function Header({ turn, status, onOpenBuilder, role, onRoleSwitch }: HeaderProps) {
   return (
-    <header className="h-14 border-b border-[#1F6FEB]/20 bg-[#0F1115] flex items-center justify-between px-6 shrink-0 z-50 shadow-2xl">
-      <div className="flex items-center gap-6">
+    <header className="h-14 border-b border-[#1F6FEB]/20 bg-[#0F1115] grid grid-cols-3 items-center px-6 shrink-0 z-50 shadow-2xl">
+      {/* LEFT: Logo Section */}
+      <div className="flex items-center gap-6 justify-self-start">
         <div className="flex items-center gap-3">
           <img src="/logo.svg" alt="WARMATRIX logo" className="w-8 h-8 invert brightness-75" />
           <div>
@@ -47,7 +48,8 @@ export function Header({ turn, status, onOpenBuilder, role, onRoleSwitch }: Head
         )}
       </div>
 
-      <div className="flex items-center gap-8">
+      {/* CENTER: Mission Status (Perfectly Centered) */}
+      <div className="flex items-center gap-8 justify-self-center">
         <div className="flex flex-col items-end">
           <span className="text-[9px] text-[#9CA3AF] uppercase font-bold tracking-[0.2em] mb-0.5">Mission Turn</span>
           <span className="font-headline text-xl leading-none text-[#E6EDF3] tracking-tighter">{turn.toString().padStart(3, '0')}</span>
@@ -77,7 +79,8 @@ export function Header({ turn, status, onOpenBuilder, role, onRoleSwitch }: Head
         </Button>
       </div>
 
-      <div className="flex items-center gap-4">
+      {/* RIGHT: System Indicators */}
+      <div className="flex items-center gap-4 justify-self-end">
         <div className="flex items-center gap-2 text-[#4B5563]">
           <Cpu className="w-3.5 h-3.5" />
           <span className="text-[9px] font-mono tracking-tighter uppercase">N_77_BETA</span>
