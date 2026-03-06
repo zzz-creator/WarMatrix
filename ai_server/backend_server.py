@@ -248,8 +248,6 @@ def generate_sitrep(
     gen_kwargs: dict = {
         "max_new_tokens":    max_new_tokens,
         "use_cache":         use_cache,
-        "repetition_penalty": repetition_penalty,
-        "no_repeat_ngram_size": 3,
         "eos_token_id":      _tokenizer.eos_token_id,
         "pad_token_id":      _tokenizer.eos_token_id,
     }
