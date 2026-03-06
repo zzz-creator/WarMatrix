@@ -5,6 +5,7 @@ import { Header } from '@/components/Header';
 import { TacticalMapDisplay } from '@/components/TacticalMapDisplay';
 import { ScenarioBuilder } from '@/components/ScenarioBuilder';
 import { SecureCommsConsole, ChatMessage, MessageSource, INITIAL_LOG, nowTs } from '@/components/SecureCommsConsole';
+import { SidebarAccordion } from '@/components/SidebarAccordion';
 import { receiveStrategicAnalysis, ReceiveStrategicAnalysisOutput } from '@/ai/flows/receive-strategic-analysis';
 import { GenerateScenarioOutput } from '@/ai/flows/generate-scenario';
 import { useToast } from '@/hooks/use-toast';
@@ -58,30 +59,6 @@ const WIDGET_SOURCE_STYLE: Record<MessageSource, { label: string; color: string;
   FOG_OF_WAR_MODULE: { label: 'FOG OF WAR MODULE', color: '#94A3B8', dot: '#475569' },
   SYSTEM: { label: 'SYSTEM', color: '#22C55E', dot: '#16A34A' },
 };
-
-// ─── Weather display helpers ───────────────────────────────────────────────────
-
-function weatherTemp(w?: WeatherType): string {
-  switch (w) {
-    case 'Clear': return '24°C';
-    case 'Partly Cloudy': return '18°C';
-    case 'Storm': return '8°C';
-    case 'Fog': return '15°C';
-    case 'Heavy Rain': return '12°C';
-    case 'Sandstorm': return '34°C';
-    default: return '18°C';
-  }
-}
-
-function weatherVisibility(w?: WeatherType): string {
-  switch (w) {
-    case 'Storm': return '2.1 KM';
-    case 'Fog': return '0.4 KM';
-    case 'Heavy Rain': return '3.5 KM';
-    case 'Sandstorm': return '1.2 KM';
-    default: return '8.5 KM';
-  }
-}
 
 // ─── Page ──────────────────────────────────────────────────────────────────────
 
@@ -355,35 +332,14 @@ export default function WarMatrixPage() {
       <main className="flex-1 p-4 flex gap-4 overflow-hidden">
         {/* LEFT ZONE: Intel Widgets */}
         <div className="w-64 flex flex-col gap-4 shrink-0 overflow-y-auto pr-1 custom-scrollbar">
-          <TacticalWidget title="Terrain Status" icon={Boxes}>
-            <div className="flex flex-col gap-1">
-              <span className="text-[11px] text-[#E6EDF3] font-medium">
-                {activeScenario ? activeScenario.terrainType : '—'}
-              </span>
-              <div className="flex justify-between items-center text-[9px] text-[#9CA3AF] uppercase font-bold">
-                <span>Status</span>
-                <span className={activeScenario ? 'text-[#F59E0B]' : 'text-[#4B5563]'}>
-                  {activeScenario ? 'OPERATIONAL' : 'STANDBY'}
-                </span>
-              </div>
-            </div>
-          </TacticalWidget>
-
-          <TacticalWidget title="Weather Status" icon={CloudRain}>
-            <div className="flex flex-col gap-1">
-              <span className="text-[11px] text-[#E6EDF3] font-medium">
-                {activeScenario
-                  ? `${activeScenario.weather ?? 'Partly Cloudy'} / ${weatherTemp(activeScenario.weather)}`
-                  : '—'}
-              </span>
-              <div className="flex justify-between items-center text-[9px] text-[#9CA3AF] uppercase font-bold">
-                <span>Visibility</span>
-                <span className={activeScenario ? 'text-[#22C55E]' : 'text-[#4B5563]'}>
-                  {activeScenario ? weatherVisibility(activeScenario.weather) : 'N/A'}
-                </span>
-              </div>
-            </div>
-          </TacticalWidget>
+          {/* Sidebar Accordion with all 5 modules */}
+          <SidebarAccordion
+            activeScenario={activeScenario}
+            lastResult={lastResult}
+            loadingAnalysis={loadingAnalysis}
+            analysis={analysis}
+            turn={turn}
+          />
 
           <TacticalWidget title="Comm Status" icon={Radio}>
             <div className="flex flex-col gap-1">
@@ -397,17 +353,6 @@ export default function WarMatrixPage() {
             </div>
           </TacticalWidget>
 
-          <TacticalWidget title="Power Grid" icon={Zap}>
-            <div className="flex flex-col gap-2">
-              <div className="flex justify-between items-center text-[9px] text-[#9CA3AF] uppercase font-bold">
-                <span>Stability</span>
-                <span className="text-[#22C55E]">88%</span>
-              </div>
-              <div className="h-1 bg-[#0D223A] rounded-full overflow-hidden">
-                <div className="h-full bg-[#22C55E] w-[88%]" />
-              </div>
-            </div>
-          </TacticalWidget>
 
           <TacticalWidget
             title="AI Strategic Analysis"
@@ -502,7 +447,8 @@ export default function WarMatrixPage() {
             ) : activeScenario ? (
               <TacticalMapDisplay
                 units={visibleUnits}
-                terrainType={terrainType}
+                terrainType={terrainType as any}
+                weather={activeScenario.weather}
                 scenarioTitle={activeScenario.title}
                 mapPeaks={activeScenario.mapPeaks}
               />

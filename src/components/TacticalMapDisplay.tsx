@@ -14,9 +14,12 @@ interface ScenarioUnit {
     allianceRole?: string;
 }
 
+type WeatherType = 'Clear' | 'Partly Cloudy' | 'Storm' | 'Fog' | 'Heavy Rain' | 'Sandstorm';
+
 interface TacticalMapDisplayProps {
     units: ScenarioUnit[];
-    terrainType?: 'Highland' | 'Forest' | 'Urban' | 'Plains' | 'Desert';
+    terrainType?: 'Highland' | 'Forest' | 'Urban' | 'Plains' | 'Desert' | 'Mountain' | 'Coastal' | 'Arctic';
+    weather?: WeatherType;
     scenarioTitle?: string;
     mapPeaks?: { cx: number; cy: number; h: number; r2: number }[];
 }
@@ -182,6 +185,7 @@ function buildContourPaths(
 export function TacticalMapDisplay({
     units,
     terrainType = 'Highland',
+    weather,
     scenarioTitle,
     mapPeaks,
 }: TacticalMapDisplayProps) {
@@ -365,20 +369,83 @@ export function TacticalMapDisplay({
     const colAxis = Array.from({ length: COLS }, (_, i) => i + 1);
     const rowAxis = Array.from({ length: ROWS }, (_, i) => String(i + 1).padStart(2, '0'));
 
+    // ── Weather helpers ─────────────────────────────────────────────────────────
+    const getWeatherTemp = (w?: WeatherType) => {
+        switch (w) {
+            case 'Clear': return '24°C';
+            case 'Partly Cloudy': return '18°C';
+            case 'Storm': return '8°C';
+            case 'Fog': return '15°C';
+            case 'Heavy Rain': return '12°C';
+            case 'Sandstorm': return '34°C';
+            default: return '18°C';
+        }
+    };
+
+    const getWeatherVisibility = (w?: WeatherType) => {
+        switch (w) {
+            case 'Storm': return '2.1 KM';
+            case 'Fog': return '0.4 KM';
+            case 'Heavy Rain': return '3.5 KM';
+            case 'Sandstorm': return '1.2 KM';
+            default: return '8.5 KM';
+        }
+    };
+
     return (
         <div className="relative w-full h-full overflow-hidden" style={{ background: tc.bg }}>
 
-            {/* ── Top-left badge ── */}
-            <div className="absolute top-3 left-3 z-20 pointer-events-none flex items-center gap-1.5 px-2 py-1 rounded-sm"
-                style={{ background: 'rgba(0,0,0,0.72)', border: `1px solid ${tc.infoColor}30` }}>
-                <div className="w-1.5 h-1.5 rounded-full animate-pulse"
-                    style={{ background: tc.infoColor, boxShadow: `0 0 6px ${tc.infoColor}` }} />
-                <span className="text-[8px] font-mono font-bold uppercase tracking-widest" style={{ color: tc.infoColor }}>
-                    {tc.label}
-                </span>
-                <span className="text-[7px] font-mono ml-1 opacity-60" style={{ color: tc.infoColor }}>
-                    {tc.elevTag}
-                </span>
+            {/* ── HUD Panels ── */}
+            <div className="absolute top-3 left-3 z-30 pointer-events-none flex flex-col gap-2">
+                {/* Terrain Panel */}
+                <div
+                    className="flex items-center gap-2.5 px-3 py-1.5 rounded-sm"
+                    style={{
+                        background: 'rgba(4,10,22,0.80)',
+                        border: '1px solid rgba(31,111,235,0.28)',
+                        backdropFilter: 'blur(6px)',
+                    }}
+                >
+                    <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: tc.infoColor, boxShadow: `0 0 6px ${tc.infoColor}` }} />
+                    <div className="flex flex-col">
+                        <span className="text-[7px] font-mono font-bold uppercase tracking-[0.2em] text-[#4B6A8A] leading-none mb-1">
+                            TERRAIN STATUS
+                        </span>
+                        <div className="flex items-center gap-2">
+                            <span className="text-[9px] font-mono font-bold text-[#E6EDF3]">
+                                {terrainType}
+                            </span>
+                            <span className="text-[7px] font-mono text-[#F59E0B] uppercase">
+                                Operational
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Weather Panel */}
+                <div
+                    className="flex items-center gap-2.5 px-3 py-1.5 rounded-sm"
+                    style={{
+                        background: 'rgba(4,10,22,0.80)',
+                        border: '1px solid rgba(31,111,235,0.28)',
+                        backdropFilter: 'blur(6px)',
+                    }}
+                >
+                    <div className="w-1.5 h-1.5 rounded-full" style={{ background: '#3A8DFF', boxShadow: `0 0 6px #3A8DFF` }} />
+                    <div className="flex flex-col">
+                        <span className="text-[7px] font-mono font-bold uppercase tracking-[0.2em] text-[#4B6A8A] leading-none mb-1">
+                            WEATHER STATUS
+                        </span>
+                        <div className="flex items-center gap-2">
+                            <span className="text-[9px] font-mono font-bold text-[#E6EDF3]">
+                                {weather ?? 'Partly Cloudy'} / {getWeatherTemp(weather)}
+                            </span>
+                            <span className="text-[7px] font-mono text-[#22C55E] uppercase">
+                                Visibility: {getWeatherVisibility(weather)}
+                            </span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             {/* ── Scenario title ── */}
