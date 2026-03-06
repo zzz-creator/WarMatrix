@@ -14,6 +14,7 @@ import {
     ChevronRight,
     Award
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { Space_Grotesk } from 'next/font/google';
 
 const spaceGrotesk = Space_Grotesk({
@@ -22,6 +23,7 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export default function FinalMissionReport() {
+    const router = useRouter();
     // --- DYNAMIC DATA PLACEHOLDERS ---
     // These will be populated by the simulation engine in the future.
     // For now, they are defined here as empty or default values.
@@ -348,8 +350,8 @@ export default function FinalMissionReport() {
                         {/* RETURN BUTTON */}
                         <div className="px-6 py-12 border-t border-[#1F6FEB]/20 bg-[#0D1525]/90 flex justify-center">
                             <button
+                                onClick={() => router.push('/home')}
                                 className="group relative px-12 py-4 bg-[#0D223A] border border-[#1F6FEB]/40 hover:border-[#3A8DFF]/60 rounded-sm transition-all duration-300"
-                                disabled
                             >
                                 {/* Decorative corners */}
                                 <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-[#1F6FEB] opacity-60" />

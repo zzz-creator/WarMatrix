@@ -145,7 +145,13 @@ export function SecureCommsConsole({ isOpen, onClose, battlefieldContext = 'Sect
     const inputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        const container = chatEndRef.current?.parentElement;
+        if (container) {
+            const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 100;
+            if (isAtBottom) {
+                chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
     }, [messages]);
 
     useEffect(() => {
@@ -313,12 +319,12 @@ export function SecureCommsConsole({ isOpen, onClose, battlefieldContext = 'Sect
                         <Radio className="w-4 h-4 text-[#1F6FEB]" />
                         <div>
                             <h2 className="text-[15px] font-bold uppercase tracking-[0.25em] text-[#1F6FEB]">
-                                STRATEGIC OPERATIONS CHANNEL
+                                COMMAND LINK
                             </h2>
                             <div className="flex items-center gap-2 mt-0.5">
                                 <Lock className="w-2.5 h-2.5 text-[#22C55E]" />
                                 <span className="text-[11.5px] font-mono text-[#22C55E] uppercase tracking-wider">
-                                    AI STRATEGIST LINK — SECURE
+                                    STRATEGIC OPS UPLINK — SECURE
                                 </span>
                                 <span className="text-[11.5px] font-mono text-[#1F6FEB]/40">| AES-256 | CHANNEL ALPHA</span>
                             </div>
@@ -349,7 +355,7 @@ export function SecureCommsConsole({ isOpen, onClose, battlefieldContext = 'Sect
                         <div className="px-3 py-2 border-b border-[#1F6FEB]/10 bg-[#060C18]/60 shrink-0">
                             <span className="text-[11.5px] font-bold uppercase tracking-[0.2em] text-[#1F6FEB]/70">Conversation Log</span>
                         </div>
-                        <div className="flex-1 overflow-y-auto scrollbar-hide p-2 flex flex-col gap-1">
+                        <div className="flex-1 overflow-y-auto warmatrix-scrollbar p-2 flex flex-col gap-1 min-h-0">
                             {messages.map((msg) => {
                                 const style = sourceStyle[msg.source];
                                 return (
@@ -378,7 +384,7 @@ export function SecureCommsConsole({ isOpen, onClose, battlefieldContext = 'Sect
                     {/* ──────────────── CENTER: ACTIVE CHAT CHANNEL ──────────────── */}
                     <div className="flex-1 flex flex-col min-w-0">
                         {/* Messages */}
-                        <div className="flex-1 overflow-y-auto scrollbar-hide p-4 flex flex-col gap-3">
+                        <div className="flex-1 overflow-y-auto warmatrix-scrollbar p-4 flex flex-col gap-3 min-h-0">
                             {messages.map((msg) => {
                                 const style = sourceStyle[msg.source];
                                 const isUser = msg.source === 'COMMAND_INPUT';
@@ -495,7 +501,7 @@ export function SecureCommsConsole({ isOpen, onClose, battlefieldContext = 'Sect
                         <div className="px-3 py-2 border-b border-[#1F6FEB]/10 bg-[#060C18]/60 shrink-0">
                             <span className="text-[11.5px] font-bold uppercase tracking-[0.2em] text-[#1F6FEB]/70">AI Action Modules</span>
                         </div>
-                        <div className="flex-1 p-3 flex flex-col gap-3 overflow-y-auto scrollbar-hide">
+                        <div className="flex-1 p-3 flex flex-col gap-3 overflow-y-auto warmatrix-scrollbar min-h-0">
                             {ACTIONS.map((action) => {
                                 const Icon = action.icon;
                                 return (

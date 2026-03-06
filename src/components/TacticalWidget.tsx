@@ -23,7 +23,7 @@ export function TacticalWidget({ title, icon: Icon, children, className, headerA
         </div>
         {headerAction}
       </div>
-      <div className="p-3 flex-1 flex flex-col">
+      <div className="p-3 flex-1 flex flex-col min-h-0">
         {children}
       </div>
     </div>

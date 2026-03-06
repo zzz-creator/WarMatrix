@@ -319,7 +319,13 @@ export default function WarMatrixPage() {
   };
 
   useEffect(() => {
-    widgetChatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const container = widgetChatEndRef.current?.parentElement;
+    if (container) {
+      const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 100;
+      if (isAtBottom) {
+        widgetChatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
   }, [chatMessages]);
 
   // ── Scenario state ───────────────────────────────────────────────────────────
@@ -1050,7 +1056,7 @@ export default function WarMatrixPage() {
           >
             <div className="flex-1 flex flex-col min-h-0">
               {/* Message Feed */}
-              <div className="flex-1 overflow-y-auto warmatrix-scrollbar py-2 flex flex-col gap-2">
+              <div className="flex-1 overflow-y-auto warmatrix-scrollbar py-2 flex flex-col gap-2 min-h-0">
                 {chatMessages.map((msg) => {
                   const style = WIDGET_SOURCE_STYLE[msg.source as MessageSource] || WIDGET_SOURCE_STYLE.SYSTEM;
                   const isUser = msg.source === 'COMMAND_INPUT';

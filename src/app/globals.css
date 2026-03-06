@@ -77,26 +77,28 @@
 /* ── Warmatrix Tactical Scrollbar ────────────────────────────── */
 .warmatrix-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: #1f6feb #050810;
+  scrollbar-color: #1f6feb #060c18;
 }
 
 .warmatrix-scrollbar::-webkit-scrollbar {
-  width: 6px;
+  width: 7px;
 }
 
 .warmatrix-scrollbar::-webkit-scrollbar-track {
-  background: #050810;
+  background: #060c18;
+  border-left: 1px solid rgba(31, 111, 235, 0.1);
 }
 
 .warmatrix-scrollbar::-webkit-scrollbar-thumb {
   background: #1f6feb;
-  border-radius: 0px;
-  box-shadow: 0 0 5px rgba(31, 111, 235, 0.4);
+  border-radius: 4px;
+  border: 1px solid rgba(31, 111, 235, 0.3);
+  box-shadow: 0 0 10px rgba(31, 111, 235, 0.4);
 }
 
 .warmatrix-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #3a8dff;
-  box-shadow: 0 0 10px rgba(58, 141, 255, 0.6);
+  box-shadow: 0 0 18px rgba(58, 141, 255, 0.7);
 }
 
 .glow-blue {
