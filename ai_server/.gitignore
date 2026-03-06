@@ -1,0 +1,8 @@
+# Python envs
+.venv/
+env/
+# Model checkpoints (do not commit)
+wargame_final_outputs/
+*.safetensors
+*.pt
+*.pth
