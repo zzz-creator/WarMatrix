@@ -8,34 +8,34 @@ interface HeaderProps {
 
 export function Header({ turn, status }: HeaderProps) {
   return (
-    <header className="h-14 border-b border-[#1F2A44] bg-[#111827] flex items-center justify-between px-6 shrink-0 z-50">
+    <header className="h-14 border-b border-[#1F6FEB]/20 bg-[#0F1115] flex items-center justify-between px-6 shrink-0 z-50">
       <div className="flex items-center gap-3">
-        <div className="w-8 h-8 bg-[#0891B2]/20 rounded flex items-center justify-center border border-[#0891B2]/40">
-          <Shield className="w-5 h-5 text-[#22D3EE]" />
+        <div className="w-8 h-8 bg-[#1F6FEB]/10 rounded flex items-center justify-center border border-[#1F6FEB]/30">
+          <Shield className="w-5 h-5 text-[#1F6FEB]" />
         </div>
         <div>
-          <h1 className="font-headline font-bold text-lg tracking-tight text-[#22D3EE] glow-cyan">
-            WAR<span className="text-white">MATRIX</span>
+          <h1 className="font-headline font-bold text-lg tracking-tight text-[#1F6FEB] glow-blue">
+            WAR<span className="text-[#E6EDF3]">MATRIX</span>
           </h1>
           <div className="text-[10px] text-[#9CA3AF] uppercase tracking-widest font-medium -mt-1">
-            Command & Control Interface v4.2.0
+            Tactical Command Dashboard v4.2.0
           </div>
         </div>
       </div>
 
       <div className="flex items-center gap-8">
         <div className="flex flex-col items-end">
-          <span className="text-[10px] text-[#9CA3AF] uppercase font-bold tracking-wider">Simulation Turn</span>
-          <span className="font-headline text-xl leading-none text-white">{turn.toString().padStart(3, '0')}</span>
+          <span className="text-[10px] text-[#9CA3AF] uppercase font-bold tracking-wider">Mission Turn</span>
+          <span className="font-headline text-xl leading-none text-[#E6EDF3]">{turn.toString().padStart(3, '0')}</span>
         </div>
         
-        <div className="h-8 w-px bg-[#1F2A44]" />
+        <div className="h-8 w-px bg-[#1F6FEB]/10" />
 
         <div className="flex items-center gap-3">
           <div className="flex flex-col items-end">
             <span className="text-[10px] text-[#9CA3AF] uppercase font-bold tracking-wider">System Status</span>
-            <span className={`text-xs font-bold ${status === 'ACTIVE' ? 'text-[#22C55E]' : status === 'PROCESSING' ? 'text-[#F59E0B]' : 'text-[#22D3EE]'} flex items-center gap-1.5`}>
-              <span className={`w-2 h-2 rounded-full ${status === 'ACTIVE' ? 'bg-[#22C55E] animate-pulse' : status === 'PROCESSING' ? 'bg-[#F59E0B] animate-pulse' : 'bg-[#22D3EE]'}`} />
+            <span className={`text-xs font-bold ${status === 'ACTIVE' ? 'text-[#22C55E]' : status === 'PROCESSING' ? 'text-[#F59E0B]' : 'text-[#1F6FEB]'} flex items-center gap-1.5`}>
+              <span className={`w-2 h-2 rounded-full ${status === 'ACTIVE' ? 'bg-[#22C55E] animate-pulse' : status === 'PROCESSING' ? 'bg-[#F59E0B] animate-pulse' : 'bg-[#1F6FEB]'}`} />
               {status}
             </span>
           </div>

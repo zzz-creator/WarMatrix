@@ -9,7 +9,7 @@ interface StrategicAnalysisPanelProps {
 
 export function StrategicAnalysisPanel({ analysis, loading }: StrategicAnalysisPanelProps) {
   return (
-    <aside className="w-80 bg-[#111827] border-l border-[#1F2A44] flex flex-col p-4 shrink-0 overflow-hidden">
+    <aside className="w-80 bg-[#151A20] border-l border-[#1F6FEB]/20 flex flex-col p-4 shrink-0 overflow-hidden">
       <div className="flex items-center gap-2 mb-6">
         <BrainCircuit className="w-4 h-4 text-[#F59E0B]" />
         <h2 className="font-headline font-bold text-xs uppercase tracking-[0.2em] text-[#F59E0B]">Strategic Analysis</h2>
@@ -17,7 +17,7 @@ export function StrategicAnalysisPanel({ analysis, loading }: StrategicAnalysisP
 
       {loading ? (
         <div className="flex-1 flex flex-col items-center justify-center text-[#9CA3AF]">
-          <Loader2 className="w-8 h-8 animate-spin mb-4 text-[#22D3EE]" />
+          <Loader2 className="w-8 h-8 animate-spin mb-4 text-[#1F6FEB]" />
           <span className="text-xs uppercase font-bold tracking-widest animate-pulse">Consulting AI Strategist...</span>
         </div>
       ) : analysis ? (
@@ -25,10 +25,10 @@ export function StrategicAnalysisPanel({ analysis, loading }: StrategicAnalysisP
           {/* Overview */}
           <section className="space-y-2">
             <div className="flex items-center gap-2">
-              <Target className="w-3.5 h-3.5 text-[#22D3EE]" />
+              <Target className="w-3.5 h-3.5 text-[#1F6FEB]" />
               <h3 className="text-[10px] font-bold text-[#9CA3AF] uppercase tracking-widest">Operational Overview</h3>
             </div>
-            <p className="text-xs text-[#E5E7EB] leading-relaxed border-l-2 border-[#22D3EE]/30 pl-3 italic">
+            <p className="text-xs text-[#E6EDF3] leading-relaxed border-l-2 border-[#1F6FEB]/30 pl-3 italic">
               "{analysis.strategicOverview}"
             </p>
           </section>
@@ -58,13 +58,13 @@ export function StrategicAnalysisPanel({ analysis, loading }: StrategicAnalysisP
           </section>
 
           {/* Recommended Actions */}
-          <section className="space-y-3 pt-4 border-t border-[#1F2A44]">
+          <section className="space-y-3 pt-4 border-t border-[#1F6FEB]/10">
             <h3 className="text-[10px] font-bold text-white uppercase tracking-widest">Directive Recommendations</h3>
             <div className="space-y-2">
               {analysis.recommendedActions.map((action, idx) => (
                 <div key={idx} className="flex gap-3 group">
-                  <span className="text-[10px] font-mono text-[#22D3EE] font-bold">0{idx + 1}</span>
-                  <p className="text-xs text-[#E5E7EB] group-hover:text-[#22D3EE] transition-colors leading-snug">
+                  <span className="text-[10px] font-mono text-[#1F6FEB] font-bold">0{idx + 1}</span>
+                  <p className="text-xs text-[#E6EDF3] group-hover:text-[#1F6FEB] transition-colors leading-snug">
                     {action}
                   </p>
                 </div>
@@ -80,10 +80,10 @@ export function StrategicAnalysisPanel({ analysis, loading }: StrategicAnalysisP
         </div>
       )}
 
-      <div className="mt-auto pt-4 bg-[#111827] z-10">
-        <div className="bg-[#1F2937] p-2 rounded border border-[#1F2A44] flex items-center gap-3">
-          <div className="w-2 h-2 rounded-full bg-[#22C55E] animate-pulse" />
-          <span className="text-[10px] font-mono text-[#9CA3AF]">AI ENGINE ONLINE</span>
+      <div className="mt-auto pt-4 bg-[#151A20] z-10">
+        <div className="bg-[#0D223A] p-2 rounded border border-[#1F6FEB]/20 flex items-center gap-3">
+          <div className="w-2 h-2 rounded-full bg-[#22C55E] animate-pulse shadow-[0_0_5px_#22C55E]" />
+          <span className="text-[10px] font-mono text-[#9CA3AF]">AI STRATEGIST ONLINE</span>
         </div>
       </div>
     </aside>
