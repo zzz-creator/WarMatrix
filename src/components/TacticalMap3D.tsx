@@ -3,7 +3,7 @@
 import React, { useMemo, useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { Canvas, useThree } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
+import { OrbitControls, Billboard, Text, Grid } from '@react-three/drei';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import {
   TacticalTerrainMapData,
@@ -36,7 +36,6 @@ export interface TacticalMap3DControls {
   rotateRight: () => void;
 }
 
-const TERRAIN_BASE_COLOR = 0x36454f;
 const METERS_PER_WORLD_Z_UNIT = 62.5;
 const BASE_Z_OFFSET = -0.35;
 const WORLD_XY_SCALE = 4;
@@ -47,6 +46,11 @@ function TerrainGeometry({ proceduralHeightmap, cols, rows }: { proceduralHeight
     const pos = geom.attributes.position as THREE.BufferAttribute;
     const colorValues = new Float32Array(pos.count * 3);
     let minTopHeight = Number.POSITIVE_INFINITY;
+    let maxTopHeight = Number.NEGATIVE_INFINITY;
+
+    const baseColor = new THREE.Color(0x021128); // Deep dark blue
+    const peakColor = new THREE.Color(0x00e5ff); // Bright cyan
+    const colorMixer = new THREE.Color();
 
     for (let i = 0; i < pos.count; i++) {
       const x = pos.getX(i);
@@ -57,14 +61,19 @@ function TerrainGeometry({ proceduralHeightmap, cols, rows }: { proceduralHeight
       const hNorm = proceduralHeightmap[idx] ?? 0;
       const meters = normalizedHeightToMeters(hNorm);
       const height = (meters - TACTICAL_MIN_ELEVATION_M) / METERS_PER_WORLD_Z_UNIT + BASE_Z_OFFSET;
+
       minTopHeight = Math.min(minTopHeight, height);
+      maxTopHeight = Math.max(maxTopHeight, height);
 
       pos.setZ(i, height);
 
-      const color = new THREE.Color(TERRAIN_BASE_COLOR);
-      colorValues[i * 3] = color.r;
-      colorValues[i * 3 + 1] = color.g;
-      colorValues[i * 3 + 2] = color.b;
+      // Holographic coloring mix
+      const emissiveIntensity = Math.pow(hNorm, 1.5); // non-linear mix so valleys stay dark
+      colorMixer.lerpColors(baseColor, peakColor, emissiveIntensity);
+
+      colorValues[i * 3] = colorMixer.r;
+      colorValues[i * 3 + 1] = colorMixer.g;
+      colorValues[i * 3 + 2] = colorMixer.b;
     }
 
     geom.setAttribute('color', new THREE.BufferAttribute(colorValues, 3));
@@ -75,7 +84,7 @@ function TerrainGeometry({ proceduralHeightmap, cols, rows }: { proceduralHeight
     // Walls
     const wallPositions: number[] = [];
     const wallColors: number[] = [];
-    const wallColor = new THREE.Color(0x9c8a74);
+    const wallColor = new THREE.Color(0x010814); // Very dark edge 
 
     const getCorner = (hx: number, hy: number) => {
       const idx = hy * (cols + 1) + hx;
@@ -132,20 +141,39 @@ function TerrainGeometry({ proceduralHeightmap, cols, rows }: { proceduralHeight
 
   return (
     <group scale={[WORLD_XY_SCALE, WORLD_XY_SCALE, 1]}>
-      {/* Top mesh */}
+      {/* Terrain Base Mesh */}
       <mesh geometry={geom} receiveShadow={false} castShadow={false}>
-        <meshStandardMaterial vertexColors metalness={0.02} roughness={0.88} flatShading side={THREE.FrontSide} />
+        <meshStandardMaterial
+          vertexColors
+          metalness={0.1}
+          roughness={0.8}
+          flatShading
+          side={THREE.FrontSide}
+          emissive={0x00c8ff}
+          emissiveIntensity={0.1}
+        />
+      </mesh>
+
+      {/* Terrain Contours (Wireframe Overlay) */}
+      <mesh geometry={geom} receiveShadow={false} castShadow={false} position={[0, 0, 0.01]}>
+        <meshBasicMaterial
+          color={0x00e5ff}
+          wireframe
+          transparent
+          opacity={0.15}
+          blending={THREE.AdditiveBlending}
+        />
       </mesh>
 
       {/* Base mesh underneath */}
       <mesh position={[0, 0, groundZ]}>
         <planeGeometry args={[cols, rows, 1, 1]} />
-        <meshStandardMaterial color={0x9c8a74} metalness={0.02} roughness={0.92} side={THREE.DoubleSide} />
+        <meshBasicMaterial color={0x010814} side={THREE.DoubleSide} />
       </mesh>
 
       {/* Wall Extrusion */}
       <mesh geometry={wallGeometry} receiveShadow={false} castShadow={false}>
-        <meshStandardMaterial vertexColors metalness={0.02} roughness={0.9} side={THREE.DoubleSide} />
+        <meshStandardMaterial vertexColors metalness={0.0} roughness={1.0} side={THREE.DoubleSide} />
       </mesh>
     </group>
   );
@@ -161,23 +189,78 @@ function Units({ units, getGridHeight, cols, rows }: { units: any[]; getGridHeig
         const { wx, wy } = gridToWorldPosition(gx, gy, cols, rows);
         const sx = wx * WORLD_XY_SCALE;
         const sy = wy * WORLD_XY_SCALE;
-        const markerColor = unit.team === 'ally' ? 0x2563eb : unit.team === 'enemy' ? 0xdc2626 : 0xeab308;
+        const markerColor = unit.type === 'FRIENDLY' || unit.allianceRole === 'FRIENDLY' || unit.team === 'ally'
+          ? "#0088ff" // Friendly specific color
+          : unit.type === 'ENEMY' || unit.allianceRole === 'ENEMY' || unit.team === 'enemy'
+            ? "#ff2a2a" // Enemy specific color
+            : "#ffb400"; // Objective/Neutral color
+
+        const isObjective = unit.type === 'OBJECTIVE' || unit.allianceRole === 'OBJECTIVE' || unit.team === 'objective';
+        const label = unit.label || 'UNIT';
 
         return (
-          <group key={unit.id || `${unit.x}-${unit.y}`} position={[sx, sy, terrainHeight]}>
-            <mesh position={[0, 0, 0.51]} castShadow={false} receiveShadow={false}>
-              <sphereGeometry args={[0.42, 14, 14]} />
-              <meshStandardMaterial color={markerColor} emissive={markerColor} emissiveIntensity={3.6} metalness={0.04} roughness={0.5} />
+          <group key={unit.id || `${unit.x}-${unit.y}`} position={[sx, sy, terrainHeight + 1.2]}>
+            {/* Holographic Unit Billboard */}
+            <Billboard follow={true} lockX={false} lockY={false} lockZ={false}>
+              {/* Core Icon Shape */}
+              <mesh position={[0, 0, 0]}>
+                {isObjective ? (
+                  <circleGeometry args={[0.5, 32]} />
+                ) : (
+                  <planeGeometry args={[1.2, 0.8]} />
+                )}
+                <meshBasicMaterial
+                  color={markerColor}
+                  transparent
+                  opacity={0.8}
+                  blending={THREE.AdditiveBlending}
+                  depthTest={false}
+                />
+              </mesh>
+              {/* Outer Glow frame */}
+              <mesh position={[0, 0, 0]}>
+                {isObjective ? (
+                  <ringGeometry args={[0.6, 0.65, 32]} />
+                ) : (
+                  <ringGeometry args={[0.7, 0.75, 4]} />
+                )}
+                <meshBasicMaterial
+                  color={markerColor}
+                  transparent
+                  opacity={0.9}
+                  blending={THREE.AdditiveBlending}
+                  depthTest={false}
+                />
+              </mesh>
+
+              <Text
+                position={[0, -0.7, 0]}
+                fontSize={0.5}
+                color={markerColor}
+                anchorX="center"
+                anchorY="top"
+                outlineWidth={0.05}
+                outlineColor="#000"
+                font="https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZJhjp-Ek-_EeA.woff"
+              >
+                {label}
+              </Text>
+            </Billboard>
+
+            {/* Projection Beam (Down to Terrain) */}
+            <mesh position={[0, 0, -0.6]}>
+              <cylinderGeometry args={[0.02, 0.02, 1.2, 8]} />
+              <meshBasicMaterial color={markerColor} transparent opacity={0.3} blending={THREE.AdditiveBlending} />
             </mesh>
 
-            <mesh position={[0, 0, 0.24]} rotation={[Math.PI / 2, 0, 0]} castShadow={false}>
-              <torusGeometry args={[0.66, 0.09, 8, 18]} />
-              <meshStandardMaterial color={markerColor} emissive={markerColor} emissiveIntensity={0.6} metalness={0.02} roughness={0.6} />
+            {/* Glowing Sensor Rings on Terrain Surface */}
+            <mesh position={[0, 0, -1.15]} receiveShadow={false}>
+              <ringGeometry args={[1.5, 1.6, 32]} />
+              <meshBasicMaterial color={markerColor} transparent opacity={0.5} side={THREE.DoubleSide} blending={THREE.AdditiveBlending} depthWrite={false} />
             </mesh>
-
-            <mesh position={[0, 0, 0.51]}>
-              <sphereGeometry args={[0.72, 14, 14]} />
-              <meshBasicMaterial color={markerColor} transparent opacity={0.9} depthWrite={false} />
+            <mesh position={[0, 0, -1.15]} receiveShadow={false}>
+              <ringGeometry args={[2.5, 2.55, 32]} />
+              <meshBasicMaterial color={markerColor} transparent opacity={0.2} side={THREE.DoubleSide} blending={THREE.AdditiveBlending} depthWrite={false} />
             </mesh>
           </group>
         );
@@ -198,7 +281,8 @@ function SceneControls({ onControlsReady, onCameraChange, initialCameraPosition,
       if (initialCameraPosition) {
         camera.position.set(initialCameraPosition[0], initialCameraPosition[1], initialCameraPosition[2]);
       } else {
-        camera.position.set(0, -maxAxis * WORLD_XY_SCALE * 1.2, maxAxis * 0.9);
+        // Stronger Angle for Holographic Map, pointing down more natively
+        camera.position.set(0, -maxAxis * WORLD_XY_SCALE * 0.9, maxAxis * WORLD_XY_SCALE * 0.7);
       }
       initialized.current = true;
     }
@@ -231,7 +315,6 @@ function SceneControls({ onControlsReady, onCameraChange, initialCameraPosition,
 
     return () => {
       controls.removeEventListener('end', handleEnd);
-      // Attempt to save state on strict unmount explicitly
       if (onCameraChange) {
         onCameraChange(
           [camera.position.x, camera.position.y, camera.position.z],
@@ -303,7 +386,7 @@ function SceneControls({ onControlsReady, onCameraChange, initialCameraPosition,
       minDistance={Math.max(4, maxAxis * WORLD_XY_SCALE * 0.35)}
       maxDistance={Math.max(30, maxAxis * WORLD_XY_SCALE * 4.0)}
       minPolarAngle={0.12}
-      maxPolarAngle={Math.PI / 2 - 0.03}
+      maxPolarAngle={Math.PI / 2 - 0.05}
     />
   );
 }
@@ -354,17 +437,29 @@ export function TacticalMap3D({
   if (!isActive) return null;
 
   return (
-    <div className="absolute inset-0" style={{ touchAction: 'none' }} aria-label="3D Tactical Terrain View">
+    <div className="absolute inset-0 bg-[#02050A]" style={{ touchAction: 'none' }} aria-label="3D Tactical Terrain View">
       <Canvas
-        camera={{ up: [0, 0, 1], fov: 60, near: 0.1, far: 1000 }}
-        gl={{ antialias: true, alpha: false, preserveDrawingBuffer: true }}
-        shadows
+        camera={{ up: [0, 0, 1], fov: 50, near: 0.1, far: 2000 }}
+        gl={{ preserveDrawingBuffer: true, powerPreference: "high-performance" }}
+        shadows={false}
         onCreated={({ gl }) => {
-          gl.setClearColor(0x08131f);
+          gl.setClearColor(0x02050a);
         }}
       >
-        <ambientLight intensity={0.52} color={0xffffff} />
-        <directionalLight intensity={0.42} color={0xffffff} position={[30, -20, 40]} castShadow={false} />
+        {/* Holographic Atmosphere Fog */}
+        <fog attach="fog" args={['#02050a', maxAxis * WORLD_XY_SCALE * 0.8, maxAxis * WORLD_XY_SCALE * 2.5]} />
+
+        {/* Dramatic Low-Light Setup */}
+        <ambientLight intensity={0.4} color={0x1e3a8a} />
+        <directionalLight intensity={0.6} color={0x00c8ff} position={[maxAxis, -maxAxis, Math.max(gridInfo.cols, gridInfo.rows)]} />
+        <directionalLight intensity={0.2} color={0xffffff} position={[-maxAxis, maxAxis, 10]} />
+
+        {/* Tactical Grid Base */}
+        <gridHelper
+          args={[maxAxis * WORLD_XY_SCALE, gridInfo.cols, 0x0066aa, 0x002244]}
+          position={[0, 0, -1.5]}
+          rotation={[Math.PI / 2, 0, 0]}
+        />
 
         <TerrainGeometry proceduralHeightmap={proceduralHeightmap} cols={gridInfo.cols} rows={gridInfo.rows} />
         <Units units={mapData.units} cols={gridInfo.cols} rows={gridInfo.rows} getGridHeight={getGridHeight} />
