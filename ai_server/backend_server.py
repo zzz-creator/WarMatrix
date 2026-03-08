@@ -33,7 +33,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 
 HOST                       = "127.0.0.1"
 PORT                       = 8000
-MODEL_PATH                 = os.environ.get("MODEL_PATH", "..\\wargame_final_outputs\\checkpoint-125")
+MODEL_PATH                 = os.environ.get("MODEL_PATH", "wargaming_llm\\wargame_final_outputs\\checkpoint-125")
 MAX_SEQ_LENGTH             = 2048
 LOAD_IN_4BIT               = os.environ.get("LOAD_IN_4BIT",  "true").strip().lower()  in {"1", "true", "yes", "on"}
 USE_8BIT                   = os.environ.get("USE_8BIT",      "false").strip().lower() in {"1", "true", "yes", "on"}

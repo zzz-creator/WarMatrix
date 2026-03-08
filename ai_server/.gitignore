@@ -1,8 +1,4 @@
-# Python envs
-.venv/
-env/
-# Model checkpoints (do not commit)
-wargame_final_outputs/
-*.safetensors
-*.pt
-*.pth
+## Ignore transient compiled cache that is recreated at runtime
+unsloth_compiled_cache/
+
+# (other ignores intentionally omitted so files remain trackable)

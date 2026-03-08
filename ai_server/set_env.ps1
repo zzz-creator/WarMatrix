@@ -8,7 +8,7 @@ This script does NOT start the server; it only sets env vars for you to run late
 #>
 
 # Recommended safe defaults for 6GB GPU
-$env:MODEL_PATH = "..\wargame_final_outputs\checkpoint-125"
+$env:MODEL_PATH = "..\ai_server\wargaming_llm\wargame_final_outputs\checkpoint-125"
 $env:LOAD_IN_4BIT = "true"
 $env:USE_8BIT = "false"
 $env:CPU_OFFLOAD = "true"

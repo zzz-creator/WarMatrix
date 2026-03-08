@@ -36,3 +36,14 @@ Notes:
 - Adjust `MAX_GPU_MEMORY_GB` down if you still see high usage in `nvidia-smi`.
 - If `LOAD_IN_4BIT` causes issues on your card, try `USE_8BIT=true` and `LOAD_IN_4BIT=false`.
 - This setup does NOT start the server; you control when to run it.
+
+Model checkpoints:
+- The server loads a LoRA adapter checkpoint from the folder specified by the `MODEL_PATH` environment variable. If `MODEL_PATH` is not set, the server falls back to a relative default and also searches common locations (including your local clone layout).
+- Common example path on this machine: `C:\Users\FIDO\wargaming_llm\wargame_final_outputs\checkpoint-125` — you can point the server to that folder explicitly:
+
+```powershell
+$env:MODEL_PATH = 'C:\Users\FIDO\wargaming_llm\wargame_final_outputs\checkpoint-125'
+```
+
+- The checkpoint folder must contain `adapter_config.json`. If it's missing the server will raise a FileNotFoundError and print the list of paths it searched.
+- You can verify which path the server resolved by calling the health endpoint `GET /health` — the JSON includes a `model_path` field showing the resolved location.
