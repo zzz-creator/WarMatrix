@@ -1,1 +1,4 @@
+ai_server/wargaming_llm/wargame_final_outputs/checkpoint-125/*.safetensors filter=lfs diff=lfs merge=lfs -text
+ai_server/wargaming_llm/wargame_final_outputs/checkpoint-125/*.pt filter=lfs diff=lfs merge=lfs -text
+ai_server/wargaming_llm/wargame_final_outputs/checkpoint-125/*.pth filter=lfs diff=lfs merge=lfs -text
 ai_server/wargaming_llm/wargame_final_outputs/checkpoint-125/* filter=lfs diff=lfs merge=lfs -text
