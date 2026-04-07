@@ -1,8 +1,15 @@
- # WarMatrix: AI-Enabled Tactical Simulation Console
+# WarMatrix: AI-Enabled Tactical Simulation Console
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js)](https://nextjs.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688?logo=fastapi)](https://fastapi.tiangolo.com/)
+![Next.js 15](https://img.shields.io/badge/Next.js-15-black?logo=next.js)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.109+-009688?logo=fastapi)
+![React 19](https://img.shields.io/badge/React-19-61DAFB?logo=react)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?logo=tailwind-css)
+![Three.js](https://img.shields.io/badge/Three.js-r178-black?logo=three.js)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript)
+![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python)
+![PyTorch](https://img.shields.io/badge/PyTorch-2.5-EE4C2C?logo=pytorch)
+![NVIDIA CUDA](https://img.shields.io/badge/CUDA-12.1-76B900?logo=nvidia)
 
 WarMatrix is a high-fidelity, situational awareness platform that bridges the gap between tactical simulations and modern AI analytics. Designed for immersive command experience, it provides a unified "Glass Cockpit" for operational commanders across Land, Air, and Sea domains.
 
