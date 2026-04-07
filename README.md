@@ -12,11 +12,21 @@ WarMatrix is a high-fidelity, situational awareness platform that bridges the ga
 
 The WarMatrix interface is designed for high-density information display and tactical immersion.
 
-| **Main Landing Page** | **Scenario Builder** | **Command Console** |
+| **Main Landing Page** | **Scenario Builder** |
+| :---: | :---: |
+| ![Landing Page](./screenshots/landing.png) | ![Scenario Builder](./screenshots/builder.png) |
+
+---
+
+| **2D Strategic Map** | **3D Tactical Map** |
+| :---: | :---: |
+| ![2D Strategic Map](./screenshots/2d_map.png) | ![3D Tactical Map](./screenshots/3d_map.png) |
+
+---
+
+| **Command Console** | **Mission AI Briefing** | **Final Mission Report** |
 | :---: | :---: | :---: |
-| ![Landing Page](./screenshots/landing.png) | ![Scenario Builder](./screenshots/builder.png) | ![Command Console](./screenshots/console.png) |
-| **3D Tactical Map** | **Mission AI Briefing** | **Final Mission Report** |
-| ![3D Tactical Map](./screenshots/3d_map.png) | ![AI Briefing](./screenshots/briefing.png) | ![Final Report](./screenshots/report.png) |
+| ![Command Console](./screenshots/console.png) | ![AI Briefing](./screenshots/briefing.png) | ![Final Report](./screenshots/report.png) |
 
 ---
 
