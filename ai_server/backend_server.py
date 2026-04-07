@@ -212,6 +212,10 @@ def load_model() -> None:
         log("No CUDA — running on CPU (will be slow)")
         model_kwargs["torch_dtype"] = torch.float32
 
+    # Force SDPA (Scaled Dot Product Attention) to avoid "fast path" errors on Windows
+    # while maintaining high performance. 
+    model_kwargs["attn_implementation"] = "sdpa"
+
     if has_cuda:
         gpu_mem_mb = max(int(MAX_GPU_MEMORY_GB * 1024), 1024)
         max_mem_map: dict = {}

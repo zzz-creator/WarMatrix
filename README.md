@@ -1,79 +1,100 @@
- WarMatrix
+ # WarMatrix: AI-Enabled Tactical Simulation Console
 
-WarMatrix is a tactical simulation and command console application featuring a 3D tactical map interface, a scalable backend simulation engine, and an AI integration layer for an immersive operational dashboard.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js)](https://nextjs.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688?logo=fastapi)](https://fastapi.tiangolo.com/)
 
-## Tech Stack
+WarMatrix is a high-fidelity, situational awareness platform that bridges the gap between tactical simulations and modern AI analytics. Designed for immersive command experience, it provides a unified "Glass Cockpit" for operational commanders across Land, Air, and Sea domains.
 
-### Frontend
-- **Framework:** Next.js 15 (React 19)
-- **Styling:** Tailwind CSS & Radix UI primitives
-- **3D Graphics:** Three.js & React Three Fiber (@react-three/drei, @react-three/fiber)
-- **State & Forms:** Zod, React Hook Form, Embla Carousel, Recharts
+---
 
-### Backend
-- **Framework:** Python FastAPI (Uvicorn)
-- **Engine:** Custom Python-based simulation engine (`backend/engine/`)
+## 🖼️ Mission Visuals
 
-### AI Integration
-- **Framework:** Firebase Genkit & Google GenAI (`@genkit-ai/google-genai`)
+The WarMatrix interface is designed for high-density information display and tactical immersion.
 
-## Project Structure
+| **Main Landing Page** | **Scenario Builder** | **Command Console** |
+| :---: | :---: | :---: |
+| ![Landing Page](./screenshots/landing.png) | ![Scenario Builder](./screenshots/builder.png) | ![Command Console](./screenshots/console.png) |
+| **3D Tactical Map** | **Mission AI Briefing** | **Final Mission Report** |
+| ![3D Tactical Map](./screenshots/3d_map.png) | ![AI Briefing](./screenshots/briefing.png) | ![Final Report](./screenshots/report.png) |
 
-- **`src/`**: Next.js frontend code including the App Router (`src/app/`), components, and client logic.
-- **`backend/`**: Python API endpoints (`backend/api/`) and the core simulation engine (`backend/engine/`).
-- **`ai_server/`**: Genkit AI processing and development utilities.
-- **`scripts/`**: Development scripts and utilities (e.g., configuration for standalone backend/frontend dev servers).
-- **`docs/`**: Additional project documentation.
+---
 
-## Getting Started
+## 🎖️ Operational User Perspective: A 4-Step Narrative
 
-### Prerequisites
+The WarMatrix experience follows a structured operational workflow. From the initial terminal uplink to the final after-action review, the user acts as the central Node of Intelligence.
 
-- [Node.js](https://nodejs.org/) (v20+)
-- [Python](https://www.python.org/) (v3.10+)
+### Step 1: Secure Terminal Uplink & Domain Entry
+The user enters a **Classified Command Console** built with a dark-ops aesthetic—featuring scanline overlays and tactical grids. The "War Room" interface initializes with a secure system handshake, ensuring the user is placed into a focused, distraction-free strategic environment.
 
-### Installation
+### Step 2: Intelligent Scenario Synthesis
+Using the **AI Scenario Builder**, the commander defines the battlefield parameters:
+- **Environmental Context:** Selection of terrain (Highlands, Urban, Desert) and real-time weather effects (Storm, Fog, Sandstorm).
+- **ORBAT (Order of Battle):** Strategic deployment of friendly units and identification of enemy threats via a 3D tactical grid.
+- **Strategist Briefing:** The embedded **AI Strategist** synthesizes the deployment data, providing a high-level narrative briefing and initial tactical objectives.
 
-1. **Install Node.js dependencies:**
-   ```bash
-   npm install
-   ```
+### Step 3: Real-Time Tactical Command Loop
+Once the simulation is live, the user enters the active operational phase:
+- **Visual Intelligence:** A 3D map (Three.js/Fiber) displays unit positions, movement vectors, and combat encounters.
+- **Natural Language Command:** Orders are issued via the **Secure Comms Console** (e.g., *"Move 1st Battalion to the bridge and hold for reinforce"*) instead of rigid menu clicks.
+- **Simulation Authority:** The backend Python engine processes each command, calculating maneuver success, combat attrition, and objective control in real-time.
 
-2. **Setup your Python virtual environment:**
-   ```bash
-   cd backend
-   python3 -m venv .venv
-   source .venv/bin/activate  # On Windows, use: .\.venv\Scripts\activate
-   pip install -r requirements.txt
-   cd ..
-   ```
+### Step 4: Post-Operation Debrief (AAR)
+Upon mission completion, the system transitions to a **Final Mission Report** (After-Action Review):
+- **Casualty & Efficiency Analysis:** Detailed metrics on personnel losses, armor damage, and ammunition expenditure.
+- **Strategic Scoring:** The AI evaluates the commander's performance, providing a narrative critique of the tactics employed and suggesting improvements for future engagements.
 
-### Running the Application
+---
 
-The fastest way to start up the environment is to run the combined development script, which spans both the Next.js dev server and the Python FastAPI backend simultaneously:
+## 🛠️ Technical Architecture
 
-```bash
-npm run dev
-```
+### 🖥️ Frontend (Command UI)
+*   **Framework:** Next.js 15 (React 19)
+*   **3D Map Engine:** Three.js via `React Three Fiber` / `@react-three/drei`
+*   **Styling & Components:** Tailwind CSS, Radix UI primitives, Lucide Icons
+*   **Animations:** Framer Motion for smooth, tactical UI transitions
+*   **State Control:** React hooks for low-latency synchronization with the simulation backend.
 
-If you need isolated environments, you can run the services individually:
+### ⚙️ Backend (Sim Engine)
+*   **API Layer:** Python FastAPI (Uvicorn)
+*   **Core Math:** Custom Python-based simulation engine (`backend/engine/`) handling pathfinding, combat probability, and state persistence.
 
-- **Frontend (Next.js):**
-  ```bash
-  npm run dev:next
-  ```
-- **Backend (FastAPI):**
-  ```bash
-  npm run dev:backend
-  ```
-- **Genkit AI Server (Development):**
-  ```bash
-  npm run genkit:dev
-  ```
+### 🧠 AI Integration (Synthetic Strategy)
+*   **Orchestration:** Firebase Genkit
+*   **Intelligence:** Google Gemini (via `@genkit-ai/google-genai`)
+*   **Capabilities:** Narrative generation, scenario synthesis, and strategic behavior modeling.
 
-## Common Scripts
+---
 
-- `npm run build`: Build the Next.js framework for production deployment.
-- `npm run lint`: Run ESLint on the source repository.
-- `npm run typecheck`: Execute the TypeScript compiler check for strict type validations.
+## 📂 Project Structure
+
+- **`src/`**: Next.js frontend (App Router, Tactical Components, Hooks).
+- **`backend/`**: FastAPI endpoints and core Python simulation engine.
+- **`ai_server/`**: Genkit configurations and AI Flow definitions.
+- **`docs/`**: Feature blueprints and design specifications.
+- **`scripts/`**: Development utilities for service orchestration.
+
+---
+
+## 🚀 Getting Started
+
+### 📋 Prerequisites
+- **Node.js** (v20+)
+- **Python** (v3.10+)
+
+### 🔌 Installation & Execution
+
+1.  **Dependencies:** `npm install`
+2.  **Backend Environment:** Ensure you have a `.venv` in the `/backend` directory and run `pip install -r requirements.txt`.
+3.  **Run Services:**
+    ```bash
+    # Launches both Frontend and Backend concurrently
+    npm run dev
+    ```
+
+---
+
+## 📜 License
+
+WarMatrix is released under the **MIT License**. See [LICENSE](LICENSE) for more details.
 
