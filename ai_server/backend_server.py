@@ -31,7 +31,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 
 # ─── Config ───────────────────────────────────────────────────────────────────
 
-HOST                       = "127.0.0.1"
+HOST                       = "0.0.0.0"
 PORT                       = 8000
 MODEL_PATH                 = os.environ.get("MODEL_PATH", "wargaming_llm\\wargame_final_outputs\\checkpoint-125")
 MAX_SEQ_LENGTH             = 2048
@@ -184,12 +184,14 @@ def load_model() -> None:
     log(f"Adapter path : {_resolved_model_path}")
     log(f"Base model   : {base_model_name}")
 
+    hf_token = os.environ.get("HF_TOKEN")
+    model_kwargs = {"trust_remote_code": True, "token": hf_token}
+
     log("Loading tokenizer…")
-    _tokenizer = AutoTokenizer.from_pretrained(_resolved_model_path, trust_remote_code=True)
+    _tokenizer = AutoTokenizer.from_pretrained(_resolved_model_path, trust_remote_code=True, token=hf_token)
 
     has_cuda     = torch.cuda.is_available()
     compute_dtype = _resolve_compute_dtype()
-    model_kwargs = {"trust_remote_code": True}
 
     if has_cuda and LOAD_IN_4BIT and not USE_8BIT:
         log(f"Quantisation : 4-bit NF4  compute={COMPUTE_DTYPE}")
@@ -416,6 +418,59 @@ class BackendHandler(BaseHTTPRequestHandler):
                 self._send_json(400, {"error": "battlefield_data is required"})
                 return
 
+            # Check for LM Studio redirection
+            use_lm_studio = os.environ.get("USE_LM_STUDIO", "false").lower() in ("true", "1", "yes")
+            ip = os.environ.get("LM_STUDIO_IP", "127.0.0.1")
+            port = os.environ.get("LM_STUDIO_PORT", "1234")
+            lm_studio_url = f"http://{ip}:{port}" if use_lm_studio else None
+
+            if lm_studio_url:
+                log(f"Proxying request to LM Studio: {lm_studio_url}")
+                try:
+                    import urllib.request
+                    
+                    api_key = os.environ.get("LM_STUDIO_API_KEY", "not-needed").strip()
+                    # Sanitize: Remove "Bearer " prefix if user provided it in the env var
+                    if api_key.lower().startswith("bearer "):
+                        api_key = api_key[7:].strip()
+                    
+                    masked_token = f"{api_key[:6]}...{api_key[-4:]}" if len(api_key) > 10 else "***"
+                    log(f"Proxying request to LM Studio with token: {masked_token}")
+                    
+                    # Map our internal keys to OpenAI-compatible messages
+                    openai_payload = {
+                        "model": "local-model",
+                        "messages": [
+                            {"role": "system", "content": instruction},
+                            {"role": "user", "content": battlefield_data}
+                        ],
+                        "temperature": float(body.get("temperature", DEFAULT_TEMPERATURE)),
+                        "max_tokens": int(body.get("max_new_tokens", DEFAULT_MAX_NEW_TOKENS)),
+                        "stream": False
+                    }
+                    
+                    headers = {
+                        "Content-Type": "application/json",
+                        "Accept": "application/json",
+                        "Authorization": f"Bearer {api_key}"
+                    }
+                    
+                    proxy_req = urllib.request.Request(
+                        f"{lm_studio_url.rstrip('/')}/v1/chat/completions",
+                        data=json.dumps(openai_payload).encode("utf-8"),
+                        headers=headers
+                    )
+                    
+                    with urllib.request.urlopen(proxy_req, timeout=120) as resp:
+                        proxy_data = json.loads(resp.read().decode("utf-8"))
+                        response_text = proxy_data["choices"][0]["message"]["content"]
+                        self._send_json(200, {"ok": True, "response": response_text, "source": "lm_studio"})
+                        return
+                except Exception as exc:
+                    log(f"LM Studio proxy FAILED: {exc}")
+                    self._send_json(500, {"error": "lm_studio_proxy_failed", "details": str(exc)})
+                    return
+
             # Per-request overrides (all optional)
             max_new_tokens      = max(32, min(int(body.get("max_new_tokens",      DEFAULT_MAX_NEW_TOKENS)),     1024))
             temperature         = max(0.0, min(float(body.get("temperature",       DEFAULT_TEMPERATURE)),        2.0))
@@ -459,8 +514,17 @@ def run() -> None:
     print(f"  Sampling       : {DEFAULT_DO_SAMPLE}", flush=True)
     print("=" * 62, flush=True)
 
-    log("Loading fine-tuned model — this may take a minute…")
-    load_model()
+    use_lm_studio = os.environ.get("USE_LM_STUDIO", "false").lower() in ("true", "1", "yes")
+    ip = os.environ.get("LM_STUDIO_IP", "127.0.0.1")
+    port = os.environ.get("LM_STUDIO_PORT", "1234")
+    lm_studio_url = f"http://{ip}:{port}" if use_lm_studio else None
+
+    if lm_studio_url:
+        log(f"LM Studio Proxy Mode ACTIVE (skipping local model load)")
+        log(f"Forwarding requests to: {lm_studio_url}")
+    else:
+        log("Loading fine-tuned model — this may take a minute…")
+        load_model()
 
     server = ThreadingHTTPServer((HOST, PORT), BackendHandler)
     log(f"Server listening on http://{HOST}:{PORT}")

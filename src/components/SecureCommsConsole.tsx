@@ -18,6 +18,8 @@ import {
     LucideIcon,
 } from 'lucide-react';
 import { strategicCommandChat, StrategicChatOutput } from '@/ai/flows/strategic-command-chat';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -289,7 +291,7 @@ export function SecureCommsConsole({ isOpen, onClose, battlefieldContext = 'Sect
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-6" style={{ background: 'rgba(5,8,16,0.90)', backdropFilter: 'blur(6px)' }}>
+        <div className="fixed inset-0 z-[300] flex items-center justify-center p-6" style={{ background: 'rgba(5,8,16,0.90)', backdropFilter: 'blur(6px)' }}>
             {/* Panel */}
             <div
                 className="relative w-full max-w-[1400px] h-full max-h-[820px] flex flex-col rounded-sm overflow-hidden"
@@ -417,9 +419,23 @@ export function SecureCommsConsole({ isOpen, onClose, battlefieldContext = 'Sect
                                                     {msg.headline}
                                                 </p>
                                             )}
-                                            <p className="text-[14px] font-mono leading-relaxed text-[#9CA3AF]">
-                                                {msg.body}
-                                            </p>
+                                            <div className="text-[14px] font-mono leading-relaxed text-[#9CA3AF] prose prose-invert max-w-none">
+                                                <ReactMarkdown 
+                                                  remarkPlugins={[remarkGfm]}
+                                                  components={{
+                                                    table: ({node, ...props}) => <table className="border-collapse border border-[#1F6FEB]/20 my-2 w-full text-[12px]" {...props} />,
+                                                    th: ({node, ...props}) => <th className="border border-[#1F6FEB]/20 px-2 py-1 bg-[#1F6FEB]/10 text-[#3A8DFF] font-bold uppercase tracking-wider text-[10px]" {...props} />,
+                                                    td: ({node, ...props}) => <td className="border border-[#1F6FEB]/20 px-2 py-1 text-[11px]" {...props} />,
+                                                    ul: ({node, ...props}) => <ul className="list-disc ml-4 my-2 flex flex-col gap-1" {...props} />,
+                                                    ol: ({node, ...props}) => <ol className="list-decimal ml-4 my-2 flex flex-col gap-1" {...props} />,
+                                                    li: ({node, ...props}) => <li className="mb-0.5" {...props} />,
+                                                    strong: ({node, ...props}) => <strong className="text-[#3A8DFF] font-bold" {...props} />,
+                                                    code: ({node, ...props}) => <code className="bg-[#1F6FEB]/10 px-1 rounded-sm text-[#3A8DFF]" {...props} />
+                                                  }}
+                                                >
+                                                  {msg.body}
+                                                </ReactMarkdown>
+                                            </div>
 
                                             {/* Metrics */}
                                             {msg.metrics && msg.metrics.length > 0 && (

@@ -11,6 +11,8 @@ import { GenerateScenarioOutput } from '@/ai/flows/generate-scenario';
 import { useToast } from '@/hooks/use-toast';
 import { TacticalWidget } from '@/components/TacticalWidget';
 import { TacticalTerrainMapData, TacticalTeam, buildTerrainGridFromPeaks } from '@/lib/tacticalTerrain';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import {
   Activity,
   CloudRain,
@@ -1283,9 +1285,22 @@ export default function WarMatrixPage() {
                             {msg.headline}
                           </p>
                         )}
-                        <p className="text-[10px] font-mono leading-relaxed text-[#9CA3AF]">
-                          {msg.body}
-                        </p>
+                        <div className="text-[10px] font-mono leading-relaxed text-[#9CA3AF] max-w-none">
+                          <ReactMarkdown 
+                            remarkPlugins={[remarkGfm]}
+                            components={{
+                              table: ({node, ...props}) => <table className="border-collapse border border-[#1F6FEB]/20 my-1.5 w-full text-[8px]" {...props} />,
+                              th: ({node, ...props}) => <th className="border border-[#1F6FEB]/20 px-1.5 py-0.5 bg-[#1F6FEB]/10 text-[#3A8DFF] font-bold uppercase tracking-wider text-[7px]" {...props} />,
+                              td: ({node, ...props}) => <td className="border border-[#1F6FEB]/20 px-1.5 py-0.5 text-[8px]" {...props} />,
+                              ul: ({node, ...props}) => <ul className="list-disc ml-3 my-1.5 flex flex-col gap-0.5" {...props} />,
+                              ol: ({node, ...props}) => <ol className="list-decimal ml-3 my-1.5 flex flex-col gap-0.5" {...props} />,
+                              li: ({node, ...props}) => <li className="mb-0" {...props} />,
+                              strong: ({node, ...props}) => <strong className="text-[#3A8DFF] font-bold" {...props} />
+                            }}
+                          >
+                            {msg.body}
+                          </ReactMarkdown>
+                        </div>
                       </div>
                     </div>
                   );
