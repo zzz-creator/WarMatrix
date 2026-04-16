@@ -78,7 +78,7 @@ Upon mission completion, the system transitions to a **Final Mission Report** (A
 
 ### AI Integration: Synthetic Strategy
 - **Engine:** Local LLM Backend (`ai_server/`).
-- **Model Layer:** Fine-tuned local models (e.g. Qwen, Llama).
+- **Model Layer:** Fine-tuned local models (e.g. Qwen, Llama)/LMStudio Integration
 - **Functionality:** 
   - Dynamic scenario generation based on user parameters.
   - Narrative transformations of raw simulation data into military-grade briefings.
