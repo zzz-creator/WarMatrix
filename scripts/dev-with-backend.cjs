@@ -29,7 +29,7 @@ function quoteCmdArg(arg) {
   return `"${arg.replace(/"/g, '\\"')}"`;
 }
 
-function startProcess({ label, cmd, args, cwd, shell = false }) {
+function startProcess({ label, cmd, args, cwd, shell = false, env = process.env }) {
   let runCmd = cmd;
   let runArgs = args;
   let runShell = shell;
@@ -45,7 +45,7 @@ function startProcess({ label, cmd, args, cwd, shell = false }) {
     cwd,
     stdio: ['inherit', 'pipe', 'pipe'],
     shell: runShell,
-    env: process.env,
+    env,
   });
 
   child.stdout.on('data', (d) => prefixAndWrite(process.stdout, label, d));
@@ -105,7 +105,33 @@ startProcess({
 startProcess({
   label: 'BACKEND',
   cmd: pythonCmd,
-  args: ['-m', 'uvicorn', 'main:app', '--reload', '--host', '127.0.0.1', '--port', '8001'],
+  args: ['-m', 'uvicorn', 'main:app', '--reload', '--host', '0.0.0.0', '--port', '8001'],
   cwd: path.join(root, 'backend'),
   shell: false,
+});
+
+startProcess({
+  label: 'AI_SERVER',
+  cmd: pythonCmd,
+  args: [path.join(root, 'ai_server', 'backend_server.py')],
+  cwd: path.join(root, 'ai_server'),
+  shell: false,
+  env: {
+    ...process.env,
+    HF_TOKEN: process.env.HF_TOKEN,
+    USE_LM_STUDIO: process.env.USE_LM_STUDIO || 'true', // 'true' or 'false'
+    LM_STUDIO_IP: process.env.LM_STUDIO_IP || '192.168.144.11',
+    LM_STUDIO_PORT: process.env.LM_STUDIO_PORT || '1234',
+    LM_STUDIO_API_KEY: process.env.LM_STUDIO_API_KEY || 'Bearer sk-lm-qhGzqyKj:68LU2MiNCZJ1oTKgBtKP',
+    MODEL_PATH: path.join('wargaming_llm', 'wargame_final_outputs', 'checkpoint-125'),
+    LOAD_IN_4BIT: 'true',
+    USE_8BIT: 'false',
+    CPU_OFFLOAD: 'true',
+    MAX_GPU_MEMORY_GB: '24',
+    COMPUTE_DTYPE: 'float16',
+    USE_CACHE: 'true',
+    EMPTY_CUDA_CACHE_AFTER_REQUEST: 'true',
+    HF_HUB_DISABLE_SYMLINKS: '1',
+    PYTHONUNBUFFERED: '1'
+  }
 });

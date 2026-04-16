@@ -47,3 +47,14 @@ $env:MODEL_PATH = 'C:\Users\FIDO\wargaming_llm\wargame_final_outputs\checkpoint-
 
 - The checkpoint folder must contain `adapter_config.json`. If it's missing the server will raise a FileNotFoundError and print the list of paths it searched.
 - You can verify which path the server resolved by calling the health endpoint `GET /health` — the JSON includes a `model_path` field showing the resolved location.
+
+LM Studio Proxy Mode (GGUF Support)
+
+You can bypass the heavy local model loading (requiring ~4-6GB VRAM) by proxying requests to an external LM Studio instance (e.g., running a larger GGUF model on a different machine in your network).
+
+- **`USE_LM_STUDIO`**: Set to `true` to enable proxy mode.
+- **`LM_STUDIO_IP`**: The local network address of the LM Studio host (e.g., `192.168.1.15`).
+- **`LM_STUDIO_PORT`**: The API port (default is `1234`).
+- **`LM_STUDIO_API_KEY`**: Bearer token if your LM Studio setup requires authentication.
+
+When `USE_LM_STUDIO` is active, the server starts almost instantly and forwards all tactical SITREP requests to the specified endpoint.
