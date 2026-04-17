@@ -1,4 +1,4 @@
-# WarMatrix AI — Complete Setup (DIMBASS)
+# WarMatrix AI — Complete Setup
 
 This file provides a complete, machine-specific and portable guide to set up and run the WarMatrix AI backend (`ai_server/backend_server.py`). It consolidates everything: environment activation, dependency installation, the model checkpoint, environment variables, run and verification commands, troubleshooting, and reproducibility steps.
 
