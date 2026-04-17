@@ -58,20 +58,5 @@ Why there are multiple setup docs
 When to use which
 
 - New machine, want a quick start: use `SETUP_AI.md`.
-- Reproduce exactly what the author uses: use `SETUP_DIMBASS.md` + `wargame_unsloth_env.yml`.
+- Reproduce exactly what the author uses: use `SETUP.md` + `wargame_unsloth_env.yml`.
 - If you hit problems or need GPU tuning: consult `SETUP_COMPLETE.md`.
-
-Reproducibility checklist (to include in PRs or contributor docs)
-
-- [ ] `wargame_unsloth_env.yml` is included in the repo (it is committed at `ai_server/wargame_unsloth_env.yml`).
-- [ ] Model adapter/checkpoint is provided or a link to the artifact is present (Git LFS may be required to fetch real files).
-- [ ] `ai_server/set_env.ps1` is used for safe defaults on Windows (or a bash equivalent is provided for Unix).
-- [ ] Health endpoint returns valid JSON and the `model_path` in it points to the intended checkpoint folder.
-
-If you want automation
-
-I can add:
-- `ai_server/setup.ps1` — activator for Windows: activates Conda or `.venv`, dot-sources `set_env.ps1` and launches the server.
-- `ai_server/setup.sh` — bash equivalent for Linux/macOS.
-
-Tell me which automation you'd like and I will add it and commit it to the repository.
