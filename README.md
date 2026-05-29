@@ -11,6 +11,8 @@
 ![PyTorch](https://img.shields.io/badge/PyTorch-2.5-EE4C2C?logo=pytorch)
 ![NVIDIA CUDA](https://img.shields.io/badge/CUDA-12.1-76B900?logo=nvidia)
 
+Tested on:
+[url=https://valid.x86.fr/6qegm1][img]https://valid.x86.fr/cache/banner/6qegm1-6.png[/img][/url]
 WarMatrix is a high-fidelity, situational awareness platform that bridges the gap between tactical simulations and modern AI analytics. Designed for immersive command experience, it provides a unified "Glass Cockpit" for operational commanders across Land, Air, and Sea domains.
 
 ---
